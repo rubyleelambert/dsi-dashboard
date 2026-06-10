@@ -1,0 +1,2420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ruby Lee Lambert — Chief of Staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark:     #1a1008;
+    --bg-mid:      #2d1b0e;
+    --bg-card:     #f5e6c8;
+    --bg-card-alt: #e8d5a3;
+    --brass:       #b87333;
+    --copper:      #cd7f32;
+    --gold:        #d4a843;
+    --gold-bright: #f0c060;
+    --cream:       #f2e4c4;
+    --ink:         #1e0e00;
+    --ink-light:   #3d2008;
+    --rope:        #8b6914;
+    --wood-grain1: #3a1f0d;
+    --wood-grain2: #2a1508;
+    --wood-grain3: #4a2a14;
+    --shadow:      rgba(0,0,0,0.6);
+    --nav-width:   240px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-dark);
+    color: var(--cream);
+    font-family: 'Special Elite', serif;
+    font-size: 15px;
+    overflow-x: hidden;
+  }
+
+  /* ─── Cowboy Background Art ─── (real photo) */
+  #bg-art {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    background-image: url('bg-ghost-town.jpg');
+    background-size: cover;
+    background-position: center 30%;
+  }
+  #bg-art::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(8, 4, 0, 0.55) 0%,
+      rgba(12, 6, 0, 0.70) 60%,
+      rgba(20, 10, 0, 0.85) 100%
+    );
+  }
+
+  #app { position: relative; z-index: 1; }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--brass); border-radius: 4px; }
+
+  /* ─── Layout Shell ─── */
+  #app {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ─── Side Nav (desktop) ─── */
+  #sidenav {
+    display: none;
+    flex-direction: column;
+    width: var(--nav-width);
+    min-height: 100vh;
+    background:
+      linear-gradient(rgba(10,5,0,0.78), rgba(10,5,0,0.88)),
+      url('bg-cabin-wagon.jpg') center/cover no-repeat;
+    border-right: 3px solid var(--brass);
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 100;
+    padding-bottom: 20px;
+    box-shadow: 4px 0 16px rgba(0,0,0,0.7);
+  }
+
+  .sidenav-header {
+    padding: 28px 20px 20px;
+    border-bottom: 2px solid var(--brass);
+    text-align: center;
+  }
+
+  .sidenav-badge {
+    font-size: 2.4rem;
+    display: block;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 0 8px var(--gold));
+    animation: starPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes starPulse {
+    0%, 100% { filter: drop-shadow(0 0 8px var(--gold)); }
+    50% { filter: drop-shadow(0 0 18px var(--gold-bright)); }
+  }
+
+  .sidenav-title {
+    font-family: 'Rye', serif;
+    font-size: 1.05rem;
+    color: var(--gold-bright);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    line-height: 1.3;
+  }
+
+  .sidenav-subtitle {
+    font-size: 0.72rem;
+    color: var(--brass);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidenav-links {
+    list-style: none;
+    padding: 16px 0;
+    flex: 1;
+  }
+
+  .sidenav-links li { margin: 2px 0; }
+
+  .sidenav-links a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    color: var(--cream);
+    text-decoration: none;
+    font-family: 'Special Elite', serif;
+    font-size: 0.92rem;
+    letter-spacing: 1px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .sidenav-links a:hover,
+  .sidenav-links a.active {
+    background: rgba(184,115,51,0.18);
+    border-left-color: var(--gold);
+    color: var(--gold-bright);
+  }
+
+  .sidenav-links a .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+
+  .sidenav-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(184,115,51,0.4);
+    font-size: 0.68rem;
+    color: var(--brass);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* ─── Main Content ─── */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 70px; /* bottom nav space */
+  }
+
+  /* ─── Top Header (mobile) ─── */
+  #topbar {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 36px,
+        rgba(0,0,0,0.1) 36px,
+        rgba(0,0,0,0.1) 38px
+      ),
+      repeating-linear-gradient(
+        180deg,
+        var(--wood-grain1),
+        var(--wood-grain3) 5px,
+        var(--wood-grain2) 10px
+      );
+    border-bottom: 3px solid var(--brass);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  }
+
+  .topbar-badge { font-size: 2rem; filter: drop-shadow(0 0 6px var(--gold)); }
+
+  .topbar-text { flex: 1; }
+
+  .topbar-title {
+    font-family: 'Rye', serif;
+    font-size: 1.1rem;
+    color: var(--gold-bright);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+  }
+
+  .topbar-sub {
+    font-size: 0.68rem;
+    color: var(--brass);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── Bottom Nav (mobile) ─── */
+  #bottomnav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 28px,
+        rgba(0,0,0,0.12) 28px,
+        rgba(0,0,0,0.12) 30px
+      ),
+      linear-gradient(180deg, var(--wood-grain3), var(--wood-grain1));
+    border-top: 3px solid var(--brass);
+    z-index: 200;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.6);
+  }
+
+  .bn-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 4px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--cream);
+    font-family: 'Special Elite', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.5px;
+    gap: 4px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    border-left: 1px solid rgba(184,115,51,0.3);
+  }
+
+  .bn-item:first-child { border-left: none; }
+
+  .bn-item .bn-icon { font-size: 1.3rem; }
+
+  .bn-item.active,
+  .bn-item:hover {
+    background: rgba(184,115,51,0.2);
+    color: var(--gold-bright);
+  }
+
+  /* ─── Sections ─── */
+  .section {
+    display: none;
+    padding: 20px 16px 24px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Section Header ─── */
+  .section-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--brass);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-icon { font-size: 1.6rem; }
+
+  .section-title {
+    font-family: 'Rye', serif;
+    font-size: 1.3rem;
+    color: var(--gold-bright);
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+  }
+
+  .section-tagline {
+    font-size: 0.7rem;
+    color: var(--brass);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ─── Card Grid ─── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--bg-card);
+    color: var(--ink);
+    border-radius: 4px;
+    padding: 18px;
+    position: relative;
+    box-shadow:
+      0 4px 16px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    border: 2px solid var(--copper);
+    overflow: hidden;
+  }
+
+  /* Wanted poster corner ornaments */
+  .card::before,
+  .card::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--brass);
+    border-style: solid;
+  }
+  .card::before { top: 6px; left: 6px; border-width: 3px 0 0 3px; }
+  .card::after  { bottom: 6px; right: 6px; border-width: 0 3px 3px 0; }
+
+  .card-title {
+    font-family: 'Rye', serif;
+    font-size: 1.05rem;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .card-icon { font-size: 1rem; }
+
+  .card-subtitle {
+    font-size: 0.68rem;
+    color: var(--rope);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--copper);
+  }
+
+  .card-body {
+    font-size: 0.85rem;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+
+  .card-body p { margin-bottom: 8px; }
+
+  /* ─── Status Badges ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 1px solid;
+  }
+
+  .badge-gold  { background: rgba(212,168,67,0.2); color: #7a5200; border-color: var(--gold); }
+  .badge-green { background: rgba(50,120,30,0.15); color: #1a4a0a; border-color: #4a7a2a; }
+  .badge-amber { background: rgba(200,120,0,0.15); color: #6a3a00; border-color: var(--copper); }
+  .badge-dark  { background: rgba(0,0,0,0.12); color: var(--ink-light); border-color: var(--brass); }
+
+  /* ─── Links ─── */
+  .west-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-light);
+    text-decoration: none;
+    font-family: 'Special Elite', serif;
+    font-size: 0.82rem;
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--copper);
+    transition: color 0.2s;
+  }
+
+  .west-link:hover { color: var(--rope); }
+
+  /* ─── Button ─── */
+  .west-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--brass), var(--copper));
+    color: var(--ink);
+    border: 2px solid var(--gold);
+    border-radius: 3px;
+    padding: 8px 16px;
+    font-family: 'Special Elite', serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .west-btn:hover {
+    background: linear-gradient(135deg, var(--copper), var(--gold));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+
+  /* ─── Rope Divider ─── */
+  .rope-divider {
+    margin: 14px 0;
+    height: 8px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--rope) 0px,
+        var(--rope) 6px,
+        transparent 6px,
+        transparent 8px,
+        var(--gold) 8px,
+        var(--gold) 10px,
+        transparent 10px,
+        transparent 12px
+      );
+    border-radius: 4px;
+    opacity: 0.6;
+  }
+
+  /* ─── Cover Image ─── */
+  .book-cover {
+    width: 100%;
+    max-width: 220px;
+    border: 3px solid var(--brass);
+    border-radius: 3px;
+    display: block;
+    margin: 10px auto;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+  }
+
+  /* ─── Commission Tables ─── */
+  .comm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-top: 10px;
+  }
+
+  .comm-table th {
+    background: var(--ink-light);
+    color: var(--gold-bright);
+    padding: 6px 10px;
+    text-align: left;
+    font-family: 'Special Elite', serif;
+    letter-spacing: 1px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .comm-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(139,105,20,0.3);
+    color: var(--ink-light);
+  }
+
+  .comm-table tr:last-child td { border-bottom: none; }
+
+  .comm-table tr:nth-child(even) td { background: rgba(0,0,0,0.06); }
+
+  .comm-table .no-comm { color: #8a4a2a; font-style: italic; }
+
+  /* ─── Schedule Rows ─── */
+  .schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px dotted rgba(139,105,20,0.4);
+    font-size: 0.8rem;
+    color: var(--ink-light);
+  }
+  .schedule-row:last-child { border-bottom: none; }
+  .schedule-time {
+    font-family: 'Rye', serif;
+    color: var(--rope);
+    font-size: 0.75rem;
+    min-width: 70px;
+  }
+
+  /* ─── Quick Links Row ─── */
+  .quick-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  /* ─── Branch Tags ─── */
+  .branch-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+  .branch-tag {
+    background: var(--ink-light);
+    color: var(--gold-bright);
+    padding: 4px 12px;
+    border-radius: 2px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid var(--brass);
+  }
+
+  /* ─── Progress Bar ─── */
+  .progress-wrap {
+    background: rgba(0,0,0,0.15);
+    border-radius: 2px;
+    height: 10px;
+    overflow: hidden;
+    border: 1px solid var(--copper);
+    margin-top: 6px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brass), var(--gold));
+    border-radius: 2px;
+    transition: width 0.6s ease;
+    position: relative;
+  }
+
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px; height: 100%;
+    background: rgba(255,255,255,0.4);
+  }
+
+  /* ─── Wanted Poster Card (special) ─── */
+  .card-wanted {
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.03),
+        rgba(0,0,0,0.03) 1px,
+        transparent 1px,
+        transparent 22px
+      ),
+      var(--bg-card);
+  }
+
+  /* ─── Dark Card variant ─── */
+  .card-dark {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 30px,
+        rgba(255,255,255,0.015) 30px,
+        rgba(255,255,255,0.015) 32px
+      ),
+      linear-gradient(180deg, #2d1b0e, #1a1008);
+    color: var(--cream);
+    border-color: var(--brass);
+  }
+
+  .card-dark .card-title { color: var(--gold-bright); }
+  .card-dark .card-subtitle { color: var(--brass); border-color: rgba(184,115,51,0.4); }
+  .card-dark .card-body { color: var(--cream); }
+  .card-dark .card-body p { color: rgba(242,228,196,0.85); }
+  .card-dark .west-link { color: var(--gold-bright); border-color: rgba(205,127,50,0.5); }
+  .card-dark .west-link:hover { color: var(--gold); }
+
+  /* ─── DISPATCH SECTION ─── */
+  #section-dispatch {
+    padding: 0;
+    display: none;
+    flex-direction: column;
+    height: calc(100vh - 130px);
+  }
+
+  #section-dispatch.active {
+    display: flex;
+  }
+
+  .dispatch-header {
+    padding: 14px 16px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 28px,
+        rgba(0,0,0,0.1) 28px,
+        rgba(0,0,0,0.1) 30px
+      ),
+      linear-gradient(180deg, var(--wood-grain3), var(--wood-grain1));
+    border-bottom: 2px solid var(--brass);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .dispatch-title {
+    font-family: 'Rye', serif;
+    color: var(--gold-bright);
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  }
+
+  .dispatch-status {
+    font-size: 0.68rem;
+    color: var(--brass);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #666;
+    transition: background 0.3s;
+  }
+
+  .status-dot.connected { background: #4caf50; box-shadow: 0 0 6px #4caf50; }
+  .status-dot.connecting { background: var(--gold); animation: blink 1s infinite; }
+  .status-dot.error { background: #e53935; }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* Chat messages area */
+  #chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255,255,255,0.012),
+        rgba(255,255,255,0.012) 1px,
+        transparent 1px,
+        transparent 28px
+      ),
+      var(--bg-dark);
+  }
+
+  .msg-wrap {
+    display: flex;
+    flex-direction: column;
+    max-width: 82%;
+    animation: msgIn 0.25s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-wrap.user { align-self: flex-end; align-items: flex-end; }
+  .msg-wrap.agent { align-self: flex-start; align-items: flex-start; }
+
+  .msg-label {
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .msg-wrap.user .msg-label { color: var(--brass); }
+  .msg-wrap.agent .msg-label { color: var(--gold); }
+
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    position: relative;
+  }
+
+  .msg-wrap.user .msg-bubble {
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 1px solid var(--copper);
+    border-radius: 4px 0 4px 4px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .msg-wrap.agent .msg-bubble {
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 25px,
+        rgba(255,255,255,0.02) 25px,
+        rgba(255,255,255,0.02) 26px
+      ),
+      linear-gradient(135deg, var(--wood-grain3), var(--bg-mid));
+    color: var(--cream);
+    border: 1px solid var(--brass);
+    border-radius: 0 4px 4px 4px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .msg-time {
+    font-size: 0.58rem;
+    color: rgba(184,115,51,0.7);
+    margin-top: 3px;
+    letter-spacing: 1px;
+  }
+
+  .msg-streaming { opacity: 0.8; }
+
+  .msg-streaming .msg-bubble::after {
+    content: '▋';
+    color: var(--gold);
+    animation: cursor 0.7s step-end infinite;
+    margin-left: 2px;
+  }
+
+  @keyframes cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* Chat input area */
+  #chat-input-area {
+    padding: 12px 16px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 26px,
+        rgba(255,255,255,0.02) 26px,
+        rgba(255,255,255,0.02) 28px
+      ),
+      linear-gradient(180deg, var(--wood-grain3), var(--wood-grain1));
+    border-top: 2px solid var(--brass);
+    flex-shrink: 0;
+  }
+
+  .input-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  #msg-input {
+    flex: 1;
+    background: rgba(245,230,200,0.08);
+    border: 2px solid var(--brass);
+    border-radius: 3px;
+    padding: 10px 14px;
+    color: var(--cream);
+    font-family: 'Special Elite', serif;
+    font-size: 0.88rem;
+    resize: none;
+    min-height: 44px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.4;
+  }
+
+  #msg-input::placeholder { color: rgba(184,115,51,0.5); }
+  #msg-input:focus { border-color: var(--gold); }
+
+  #send-btn {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--brass), var(--copper));
+    border: 2px solid var(--gold);
+    border-radius: 3px;
+    color: var(--ink);
+    font-family: 'Special Elite', serif;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  #send-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--copper), var(--gold));
+    transform: translateY(-1px);
+  }
+
+  #send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .input-hint {
+    font-size: 0.62rem;
+    color: rgba(184,115,51,0.6);
+    text-align: center;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  /* Token modal */
+  #token-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  #token-modal.open { display: flex; }
+
+  .modal-box {
+    background: var(--bg-card);
+    color: var(--ink);
+    border: 3px solid var(--brass);
+    border-radius: 4px;
+    padding: 28px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+  }
+
+  .modal-box::before, .modal-box::after {
+    content: '';
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--gold);
+    border-style: solid;
+  }
+  .modal-box::before { top: 8px; left: 8px; border-width: 3px 0 0 3px; }
+  .modal-box::after  { bottom: 8px; right: 8px; border-width: 0 3px 3px 0; }
+
+  .modal-title {
+    font-family: 'Rye', serif;
+    font-size: 1.2rem;
+    color: var(--ink-light);
+    margin-bottom: 8px;
+  }
+
+  .modal-body { font-size: 0.82rem; color: var(--ink-light); line-height: 1.6; margin-bottom: 16px; }
+
+  .modal-input {
+    width: 100%;
+    border: 2px solid var(--brass);
+    border-radius: 3px;
+    padding: 10px 14px;
+    font-family: 'Special Elite', serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: rgba(255,255,255,0.5);
+    outline: none;
+    margin-bottom: 16px;
+  }
+
+  .modal-input:focus { border-color: var(--copper); }
+
+  /* ─── Responsive — Desktop ─── */
+  @media (min-width: 768px) {
+    #sidenav { display: flex; }
+    #topbar { display: none; }
+    #bottomnav { display: none; }
+
+    #main {
+      margin-left: var(--nav-width);
+      padding-bottom: 0;
+    }
+
+    .section { padding: 28px 32px 32px; }
+
+    .card-grid {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    #section-dispatch {
+      height: calc(100vh - 0px);
+      padding: 0;
+    }
+
+    #section-dispatch.active {
+      display: flex;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .card-grid {
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+  }
+
+  /* ─── Decorative Star Separator ─── */
+  .star-sep {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+    color: var(--brass);
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .star-sep::before,
+  .star-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--brass), transparent);
+  }
+
+  /* ─── Blitz Section ─── */
+  .blitz-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .blitz-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .blitz-stat {
+    background: var(--bg-card);
+    border: 2px solid var(--copper);
+    border-radius: 4px;
+    padding: 12px 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .blitz-stat::before,
+  .blitz-stat::after {
+    content: '';
+    position: absolute;
+    width: 12px; height: 12px;
+    border-color: var(--brass);
+    border-style: solid;
+  }
+  .blitz-stat::before { top: 4px; left: 4px; border-width: 2px 0 0 2px; }
+  .blitz-stat::after  { bottom: 4px; right: 4px; border-width: 0 2px 2px 0; }
+
+  .blitz-stat-num {
+    font-family: 'Rye', serif;
+    font-size: 1.8rem;
+    color: var(--ink-light);
+    line-height: 1;
+  }
+
+  .blitz-stat-label {
+    font-size: 0.62rem;
+    color: var(--rope);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .blitz-table-wrap {
+    background: var(--bg-card);
+    border: 2px solid var(--copper);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .blitz-table-wrap::before,
+  .blitz-table-wrap::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--brass);
+    border-style: solid;
+    z-index: 2;
+  }
+  .blitz-table-wrap::before { top: 6px; left: 6px; border-width: 3px 0 0 3px; }
+  .blitz-table-wrap::after  { bottom: 6px; right: 6px; border-width: 0 3px 3px 0; }
+
+  .blitz-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  .blitz-table th {
+    background: var(--ink-light);
+    color: var(--gold-bright);
+    padding: 9px 12px;
+    text-align: left;
+    font-family: 'Special Elite', serif;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .blitz-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(139,105,20,0.25);
+    color: var(--ink-light);
+    vertical-align: middle;
+  }
+
+  .blitz-table tr:last-child td { border-bottom: none; }
+  .blitz-table tr:nth-child(even) td { background: rgba(0,0,0,0.04); }
+  .blitz-table tr:hover td { background: rgba(184,115,51,0.08); }
+
+  .blitz-table .act-btn {
+    background: transparent;
+    border: 1px solid var(--copper);
+    border-radius: 2px;
+    color: var(--ink-light);
+    font-family: 'Special Elite', serif;
+    font-size: 0.68rem;
+    padding: 3px 7px;
+    cursor: pointer;
+    margin-right: 4px;
+    transition: all 0.15s;
+  }
+  .blitz-table .act-btn:hover { background: var(--copper); color: #fff; }
+  .blitz-table .act-btn.del:hover { background: #a33; color: #fff; border-color: #a33; }
+
+  .status-pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 2px;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .sp-cold    { background: rgba(100,130,180,0.12); color: #2a4080; border-color: #7090c0; }
+  .sp-contact { background: rgba(200,140,0,0.15);   color: #6a3a00; border-color: var(--copper); }
+  .sp-followup{ background: rgba(120,60,180,0.12);  color: #4a1880; border-color: #9060c0; }
+  .sp-meeting { background: rgba(30,120,50,0.15);   color: #0a4010; border-color: #3a8040; }
+  .sp-won     { background: rgba(50,150,50,0.2);    color: #1a5010; border-color: #4aa040; }
+  .sp-lost    { background: rgba(180,40,20,0.12);   color: #6a1010; border-color: #b04030; }
+
+  /* Add Lead Modal */
+  #blitz-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #blitz-modal.open { display: flex; }
+
+  .blitz-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .blitz-form-row.full { grid-template-columns: 1fr; }
+
+  .blitz-label {
+    font-size: 0.68rem;
+    color: var(--rope);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    display: block;
+  }
+
+  .blitz-input {
+    width: 100%;
+    border: 2px solid var(--brass);
+    border-radius: 3px;
+    padding: 7px 10px;
+    font-family: 'Special Elite', serif;
+    font-size: 0.82rem;
+    color: var(--ink);
+    background: rgba(255,255,255,0.6);
+    outline: none;
+  }
+  .blitz-input:focus { border-color: var(--copper); }
+
+  .blitz-select {
+    width: 100%;
+    border: 2px solid var(--brass);
+    border-radius: 3px;
+    padding: 7px 10px;
+    font-family: 'Special Elite', serif;
+    font-size: 0.82rem;
+    color: var(--ink);
+    background: rgba(255,255,255,0.6);
+    outline: none;
+    appearance: none;
+  }
+
+  @media (max-width: 600px) {
+    .blitz-form-row { grid-template-columns: 1fr; }
+  }
+
+  /* Blitz Master List Accordion */
+  .blitz-tier { margin-bottom: 8px; border-radius: 4px; overflow: hidden; }
+  .blitz-tier-hdr {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 16px;
+    cursor: pointer;
+    font-family: 'Rye', serif;
+    font-size: 0.92rem;
+    color: var(--cream);
+    user-select: none;
+  }
+  .blitz-tier.collapsed .blitz-tier-body { display: none !important; }
+  .blitz-tier-arrow { font-size: 0.75rem; transition: transform 0.2s; margin-left: 4px; }
+  .blitz-tier.collapsed .blitz-tier-arrow { transform: rotate(-90deg); }
+  .blitz-tier-body { background: var(--bg-card); }
+  .blitz-lcard {
+    padding: 11px 16px;
+    border-bottom: 1px solid rgba(139,105,20,0.2);
+    color: var(--ink-light);
+  }
+  .blitz-lcard:last-child { border-bottom: none; }
+  .blitz-lcard:hover { background: rgba(184,115,51,0.06); }
+  .blitz-ltop { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:3px; }
+  .blitz-lnum { font-family:'Rye',serif; font-size:0.72rem; color:var(--rope); min-width:18px; }
+  .blitz-lname { font-weight:bold; font-size:0.88rem; color:var(--ink); }
+  .blitz-lco { font-size:0.82rem; color:var(--rope); }
+  .blitz-lrep { margin-left:auto; font-size:0.62rem; letter-spacing:1px; text-transform:uppercase; background:var(--ink-light); color:var(--gold-bright); padding:1px 7px; border-radius:2px; border:1px solid var(--brass); white-space:nowrap; }
+  .blitz-lbest { font-size:0.62rem; background:#8a2000; color:#ffd080; padding:1px 7px; border-radius:2px; border:1px solid #d04020; letter-spacing:1px; }
+  .blitz-lbody { font-size:0.78rem; color:var(--ink-light); line-height:1.75; padding-left:26px; }
+  .blitz-laction { margin-top:4px; background:rgba(184,115,51,0.12); border-left:3px solid var(--copper); padding:4px 8px; font-size:0.76rem; color:var(--ink); border-radius:0 2px 2px 0; }
+  .blitz-divider { margin:20px 0 14px; display:flex; align-items:center; gap:12px; }
+  .blitz-divider span { font-family:'Rye',serif; font-size:0.88rem; color:var(--gold-bright); white-space:nowrap; text-shadow:1px 1px 3px rgba(0,0,0,0.6); }
+  .blitz-divider::before, .blitz-divider::after { content:''; flex:1; height:2px; background:linear-gradient(90deg,transparent,var(--brass),transparent); }
+
+  /* ─── System message in chat ─── */
+  .sys-msg {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--brass);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 0;
+    opacity: 0.7;
+  }
+
+  /* Scrollback top padding */
+  #chat-messages > *:first-child { margin-top: auto; }
+</style>
+</head>
+<body>
+<!-- ─── Cowboy Background Art ─────────────────────────────────────────────── -->
+<div id="bg-art"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     TOKEN MODAL
+════════════════════════════════════════════════ -->
+<div id="token-modal">
+  <div class="modal-box">
+    <h2 class="modal-title">⭐ Gateway Connection</h2>
+    <p class="modal-body">
+      Enter your OpenClaw gateway address and token to connect the dispatch wire.<br>
+      Stored locally — never sent anywhere else.
+    </p>
+    <label style="font-size:0.75rem; color:var(--rope); display:block; margin-bottom:4px;">Gateway URL</label>
+    <input type="text" id="ws-url-input" class="modal-input" placeholder="ws://192.168.1.26:8384" style="margin-bottom:10px;">
+    <label style="font-size:0.75rem; color:var(--rope); display:block; margin-bottom:4px;">Token</label>
+    <input type="password" id="token-input" class="modal-input" placeholder="oc_xxxxxxxxxxxxxxxx">
+    <button class="west-btn" onclick="saveToken()" style="width:100%; justify-content: center;">
+      ⚡ Connect the Wire
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     APP SHELL
+════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── Side Nav (desktop) ── -->
+  <nav id="sidenav">
+    <div class="sidenav-header">
+      <span class="sidenav-badge">⭐</span>
+      <div class="sidenav-title">Ruby Lee Lambert</div>
+      <div class="sidenav-subtitle">Chief of Staff</div>
+    </div>
+    <ul class="sidenav-links">
+      <li><a href="#" onclick="showSection('personal')" class="active" id="snav-personal">
+        <span class="nav-icon">🏠</span> Personal
+      </a></li>
+      <li><a href="#" onclick="showSection('dsi')" id="snav-dsi">
+        <span class="nav-icon">🔧</span> DSI
+      </a></li>
+      <li><a href="#" onclick="showSection('starlit')" id="snav-starlit">
+        <span class="nav-icon">🌟</span> Starlit
+      </a></li>
+      <li><a href="#" onclick="showSection('blitz')" id="snav-blitz">
+        <span class="nav-icon">🔥</span> Sales Blitz
+      </a></li>
+      <li><a href="#" onclick="showSection('dispatch')" id="snav-dispatch">
+        <span class="nav-icon">⚡</span> The Wire
+      </a></li>
+    </ul>
+    <div class="sidenav-footer">
+      ESTABLISHED 2025 · TEXAS<br>
+      <span id="sidenav-clock" style="font-size:0.8rem; color: var(--gold);"></span>
+    </div>
+  </nav>
+
+  <!-- ── Main ── -->
+  <div id="main">
+
+    <!-- Top Bar (mobile) -->
+    <header id="topbar">
+      <div class="topbar-badge">⭐</div>
+      <div class="topbar-text">
+        <div class="topbar-title">Ruby Lee Lambert</div>
+        <div class="topbar-sub">Chief of Staff</div>
+      </div>
+      <div id="topbar-clock" style="font-size:0.75rem; color: var(--gold); font-family:'Special Elite',serif; text-align:right;"></div>
+    </header>
+
+    <!-- ══ PERSONAL SECTION ══ -->
+    <section id="section-personal" class="section active">
+      <div class="section-header">
+        <span class="section-icon">🏠</span>
+        <div>
+          <div class="section-title">The Homestead</div>
+          <div class="section-tagline">Personal Command Center</div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+        <!-- The Hideout -->
+        <div class="card card-wanted">
+          <div class="card-title">
+            <span class="card-icon">📖</span> The Hideout
+          </div>
+          <div class="card-subtitle">Dusty Creek Hideout · Novel</div>
+          <div class="card-body">
+            <img
+              src="THE_DUSTY_CREEK_HIDEOUT_Cover_Final.jpg"
+              alt="The Dusty Creek Hideout Cover"
+              class="book-cover"
+              onerror="this.style.display='none'; document.getElementById('cover-fallback').style.display='block'">
+            <div id="cover-fallback" style="display:none; text-align:center; padding:20px 0; color:var(--rope); font-size:0.8rem;">
+              📚 Cover image not found at local path
+            </div>
+            <div class="rope-divider"></div>
+            <p><em>"When the sky splits and the creek runs wild."</em></p>
+            <p>Author: <strong>Skeeter Lambert</strong></p>
+            <div class="quick-links" style="margin-top:12px;">
+              <a href="file:///Users/rubyleelambert/.openclaw/workspace/starlit-solutions/THE_DUSTY_CREEK_HIDEOUT_Book.docx"
+                 class="west-link" target="_blank">
+                📄 Open Manuscript
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Brain -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-icon">🧠</span> The Brain
+          </div>
+          <div class="card-subtitle">Second Brain · Notes System</div>
+          <div class="card-body">
+            <div style="margin-bottom:10px;">
+              <span class="badge badge-green">● Active</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-time">📝 Notes</span>
+              <span>4 captured this cycle</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-time">📊 Reports</span>
+              <span>Overnight — Mon / Wed / Fri</span>
+            </div>
+            <div class="rope-divider"></div>
+            <p style="font-size:0.75rem; color:var(--rope);">
+              Captures decisions, context, and lessons from every session.
+            </p>
+          </div>
+        </div>
+
+        <!-- Morning Report -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-icon">🌅</span> Morning Report
+          </div>
+          <div class="card-subtitle">Daily Intelligence Brief</div>
+          <div class="card-body">
+            <div class="schedule-row">
+              <span class="schedule-time">🌄 7:00 AM</span>
+              <span>Morning Dispatch</span>
+            </div>
+            <div class="schedule-row">
+              <span class="schedule-time">🌆 7:00 PM</span>
+              <span>Evening Roundup</span>
+            </div>
+            <div class="rope-divider"></div>
+            <p style="font-size:0.75rem; color:var(--rope);">
+              Weather · Calendar · Priority intel — delivered to Dispatch.
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="card card-dark">
+          <div class="card-title">
+            <span class="card-icon">🔗</span> The Saddlebag
+          </div>
+          <div class="card-subtitle">Quick Links</div>
+          <div class="card-body">
+            <div class="quick-links" style="flex-direction:column; gap:8px;">
+              <a href="https://www.icloud.com/mail" target="_blank" class="west-link">
+                ✉️ iCloud Mail
+              </a>
+              <a href="https://www.icloud.com/calendar" target="_blank" class="west-link">
+                📅 iCloud Calendar
+              </a>
+              <a href="https://www.icloud.com/notes" target="_blank" class="west-link">
+                📝 iCloud Notes
+              </a>
+            </div>
+            <div class="rope-divider"></div>
+            <div id="personal-clock" style="text-align:center; font-family:'Rye',serif; font-size:1.4rem; color:var(--gold-bright);"></div>
+            <div style="text-align:center; font-size:0.65rem; color:var(--brass); letter-spacing:2px; margin-top:4px;">
+              CENTRAL TIME · TEXAS
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ DSI SECTION ══ -->
+    <section id="section-dsi" class="section">
+      <div class="section-header">
+        <span class="section-icon">🔧</span>
+        <div>
+          <div class="section-title">Dynamic Systems</div>
+          <div class="section-tagline">HVAC · Plumbing · Texas</div>
+        </div>
+      </div>
+
+      <div class="branch-tags" style="margin-bottom:20px;">
+        <span class="branch-tag">📍 Houston</span>
+        <span class="branch-tag">📍 College Station / Waco</span>
+        <span class="badge badge-amber">Service / Sales Manager</span>
+      </div>
+
+      <div class="card-grid">
+
+        <!-- The Payroll -->
+        <div class="card" style="grid-column: 1 / -1;">
+          <div class="card-title">
+            <span class="card-icon">💰</span> The Payroll
+          </div>
+          <div class="card-subtitle">Commission Calculator · Division 300 (HVAC)</div>
+          <div class="card-body">
+
+            <div style="display: grid; gap: 16px;">
+              <!-- Table 1 -->
+              <div>
+                <div class="star-sep">Table 1 · Repair Work</div>
+                <p style="font-size:0.72rem; color:var(--rope); margin-bottom:6px;">
+                  Repair jobs (+ Replacement at 35%+ margin) · Calculated on <strong>Gross Revenue</strong>
+                </p>
+                <table class="comm-table">
+                  <thead>
+                    <tr>
+                      <th>Gross Margin %</th>
+                      <th>Commission Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="no-comm">Below 35%</td><td class="no-comm">No commission</td></tr>
+                    <tr><td>35% – 39.99%</td><td>1.25% of Gross Revenue</td></tr>
+                    <tr><td>40% – 44.99%</td><td>1.50% of Gross Revenue</td></tr>
+                    <tr><td>45% and above</td><td>2.50% of Gross Revenue</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Table 2 -->
+              <div>
+                <div class="star-sep">Table 2 · Replacement Work</div>
+                <p style="font-size:0.72rem; color:var(--rope); margin-bottom:6px;">
+                  Replacement jobs (below 35% margin) · Calculated on <strong>Net Margin</strong>
+                </p>
+                <table class="comm-table">
+                  <thead>
+                    <tr>
+                      <th>Gross Margin %</th>
+                      <th>Commission Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td class="no-comm">Below 20%</td><td class="no-comm">No commission</td></tr>
+                    <tr><td>20% – 24.99%</td><td>1% of Net Margin</td></tr>
+                    <tr><td>25% – 29.99%</td><td>2% of Net Margin</td></tr>
+                    <tr><td>30% – 34.99%</td><td>3% of Net Margin</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="rope-divider"></div>
+            <p style="font-size:0.72rem; color:var(--rope);">
+              ⚙️ <strong>Process:</strong> BuildOps → Service Profitability V2 → Division 300 → Export → AI calc via ChatGPT prompts
+            </p>
+          </div>
+        </div>
+
+        <!-- The Roster -->
+        <div class="card card-dark">
+          <div class="card-title">
+            <span class="card-icon">📋</span> The Roster
+          </div>
+          <div class="card-subtitle">Candidate Pipeline</div>
+          <div class="card-body">
+            <p>Track applicants across both branches — Houston and College Station/Waco.</p>
+            <div class="rope-divider"></div>
+            <a href="https://dsi-hiring-app.web.app" target="_blank" class="west-btn" style="display:inline-flex; margin-top:4px;">
+              🤠 Open Hiring Board
+            </a>
+          </div>
+        </div>
+
+        <!-- The Wire -->
+        <div class="card card-dark" style="cursor:pointer;" onclick="showSection('dispatch')">
+          <div class="card-title">
+            <span class="card-icon">⚡</span> The Wire
+          </div>
+          <div class="card-subtitle">Direct line to Ruby Lee Lambert</div>
+          <div class="card-body">
+            <p>Talk to Ruby directly — recruiting help, commission calc, Starlit intel, anything.</p>
+            <div class="rope-divider"></div>
+            <a href="#" onclick="showSection('dispatch'); return false;" class="west-btn" style="display:inline-flex; margin-top:4px;">
+              ⚡ Open The Wire
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ STARLIT SECTION ══ -->
+    <section id="section-starlit" class="section">
+      <div class="section-header">
+        <span class="section-icon">🌟</span>
+        <div>
+          <div class="section-title">Starlit Solutions</div>
+          <div class="section-tagline">Gov Contracting · Texas</div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+        <!-- The Territory -->
+        <div class="card card-wanted">
+          <div class="card-title">
+            <span class="card-icon">🏛️</span> The Territory
+          </div>
+          <div class="card-subtitle">Business Status · SDVOSB</div>
+          <div class="card-body">
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+              <span class="badge badge-gold">⭐ SDVOSB Certified</span>
+              <span class="badge badge-amber">51% Owner · Skeet</span>
+              <span class="badge badge-dark">Stage: Early / Building</span>
+            </div>
+            <div class="rope-divider"></div>
+            <p><strong>Mission:</strong> Partner with Texas contractors to bid on and perform government contracts.</p>
+            <p style="margin-top:8px; font-size:0.75rem; color:var(--rope);">
+              Service-Disabled Veteran-Owned Small Business — certified and ready to ride.
+            </p>
+            <div class="progress-wrap" style="margin-top:14px;">
+              <div class="progress-bar" style="width: 30%"></div>
+            </div>
+            <div style="font-size:0.65rem; color:var(--rope); margin-top:4px; letter-spacing:1px;">
+              BUILD PHASE — 30% OPERATIONAL
+            </div>
+          </div>
+        </div>
+
+        <!-- The Bid Board -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-icon">📌</span> The Bid Board
+          </div>
+          <div class="card-subtitle">Training Program · Gov Contracting</div>
+          <div class="card-body">
+            <p>Apex training plan for government contracting workflows and compliance.</p>
+            <div class="rope-divider"></div>
+            <a href="file:///Users/rubyleelambert/.openclaw/workspace/starlit/training-program.md"
+               class="west-link" target="_blank">
+              📄 Training Program
+            </a>
+            <br>
+            <a href="file:///Users/rubyleelambert/.openclaw/workspace/starlit/apex-training-plan.md"
+               class="west-link" target="_blank" style="margin-top:6px;">
+              📋 Apex Training Plan
+            </a>
+          </div>
+        </div>
+
+        <!-- The Partnership -->
+        <div class="card card-dark">
+          <div class="card-title">
+            <span class="card-icon">🤝</span> The Partnership
+          </div>
+          <div class="card-subtitle">Mentor-Protégé Program</div>
+          <div class="card-body">
+            <div style="margin-bottom:10px;">
+              <span class="badge badge-amber">⏳ In Development</span>
+            </div>
+            <p>Mentor-protégé structure for teaming with established prime contractors on federal bids.</p>
+            <div class="rope-divider"></div>
+            <a href="file:///Users/rubyleelambert/.openclaw/workspace/starlit/mentor-protege/"
+               class="west-link" target="_blank">
+              📁 Open Mentor-Protégé Folder
+            </a>
+            <br>
+            <a href="file:///Users/rubyleelambert/.openclaw/workspace/starlit-solutions/capabilities-statement.md"
+               class="west-link" target="_blank" style="margin-top:6px;">
+              📝 Capabilities Statement
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ HOUSTON SALES BLITZ SECTION ══ -->
+    <section id="section-blitz" class="section">
+      <div class="section-header">
+        <span class="section-icon">🔥</span>
+        <div>
+          <div class="section-title">Houston Sales Blitz</div>
+          <div class="section-tagline">DSI · Follow-Up Tracker</div>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="blitz-stats" id="blitz-stats">
+        <div class="blitz-stat"><div class="blitz-stat-num" id="bs-total">0</div><div class="blitz-stat-label">Total Leads</div></div>
+        <div class="blitz-stat"><div class="blitz-stat-num" id="bs-contacted">0</div><div class="blitz-stat-label">Contacted</div></div>
+        <div class="blitz-stat"><div class="blitz-stat-num" id="bs-followup">0</div><div class="blitz-stat-label">Follow-Up</div></div>
+        <div class="blitz-stat"><div class="blitz-stat-num" id="bs-meeting">0</div><div class="blitz-stat-label">Meetings Set</div></div>
+        <div class="blitz-stat"><div class="blitz-stat-num" id="bs-won">0</div><div class="blitz-stat-label">Won</div></div>
+      </div>
+
+      <!-- Master Blitz List -->
+      <div id="master-list-accordion"></div>
+
+      <div class="blitz-divider"><span>➕ Add / Track New Lead</span></div>
+
+      <!-- Toolbar -->
+      <div class="blitz-toolbar">
+        <button class="west-btn" onclick="openBlitzModal()">
+          ➕ Add Lead
+        </button>
+        <button class="west-btn" onclick="exportBlitz()" style="background: linear-gradient(135deg,#3a5a2a,#4a7a38); border-color:#6aaa50;">
+          📋 Copy to Clipboard
+        </button>
+        <button class="west-btn" onclick="clearBlitz()" style="background: linear-gradient(135deg,#5a2a2a,#7a3838); border-color:#aa5050;">
+          🗑 Clear All
+        </button>
+        <div style="flex:1; text-align:right; font-size:0.68rem; color:var(--brass); letter-spacing:1px;">
+          Saves automatically in browser
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="blitz-table-wrap">
+        <table class="blitz-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Contact</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Last Contact</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="blitz-tbody">
+            <tr id="blitz-empty-row">
+              <td colspan="8" style="text-align:center; padding:28px; color:var(--rope); font-style:italic;">No leads yet — hit Add Lead to start the blitz 🤠</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Blitz Add/Edit Modal -->
+    <div id="blitz-modal">
+      <div class="modal-box" style="max-width:520px;">
+        <h2 class="modal-title" id="blitz-modal-title">➕ Add Lead</h2>
+        <input type="hidden" id="blitz-edit-id" value="">
+        <div class="blitz-form-row">
+          <div>
+            <label class="blitz-label">Company *</label>
+            <input class="blitz-input" id="bf-company" placeholder="Acme Corp" autocomplete="off">
+          </div>
+          <div>
+            <label class="blitz-label">Contact Name</label>
+            <input class="blitz-input" id="bf-contact" placeholder="John Smith" autocomplete="off">
+          </div>
+        </div>
+        <div class="blitz-form-row">
+          <div>
+            <label class="blitz-label">Phone</label>
+            <input class="blitz-input" id="bf-phone" placeholder="(713) 555-0100" type="tel" autocomplete="off">
+          </div>
+          <div>
+            <label class="blitz-label">Email</label>
+            <input class="blitz-input" id="bf-email" placeholder="contact@company.com" type="email" autocomplete="off">
+          </div>
+        </div>
+        <div class="blitz-form-row">
+          <div>
+            <label class="blitz-label">Status</label>
+            <select class="blitz-select" id="bf-status">
+              <option value="cold">❄️ Cold</option>
+              <option value="contact">📞 Contacted</option>
+              <option value="followup">🔄 Follow-Up</option>
+              <option value="meeting">📅 Meeting Set</option>
+              <option value="won">✅ Won</option>
+              <option value="lost">❌ Lost</option>
+            </select>
+          </div>
+          <div>
+            <label class="blitz-label">Last Contact Date</label>
+            <input class="blitz-input" id="bf-date" type="date" autocomplete="off">
+          </div>
+        </div>
+        <div class="blitz-form-row full">
+          <div>
+            <label class="blitz-label">Notes</label>
+            <textarea class="blitz-input" id="bf-notes" rows="3" placeholder="Left voicemail, called back about HVAC maintenance contract…" style="resize:vertical;"></textarea>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:4px;">
+          <button class="west-btn" onclick="saveBlitzLead()" style="flex:1; justify-content:center;">💾 Save Lead</button>
+          <button onclick="closeBlitzModal()" style="background:transparent; border:1px solid rgba(184,115,51,0.5); color:var(--ink-light); font-family:'Special Elite',serif; font-size:0.8rem; padding:8px 16px; border-radius:3px; cursor:pointer;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DISPATCH SECTION ══ -->
+    <section id="section-dispatch">
+      <div class="dispatch-header">
+        <span style="font-size:1.5rem;">📡</span>
+        <div style="flex:1;">
+          <div class="dispatch-title">Telegraph Dispatch</div>
+          <div class="dispatch-status">
+            <span class="status-dot" id="ws-dot"></span>
+            <span id="ws-status-text">Disconnected</span>
+          </div>
+        </div>
+        <button class="west-btn" onclick="reconnectWS()" style="font-size:0.7rem; padding:6px 12px;">
+          ⚡ Reconnect
+        </button>
+        <button onclick="clearToken()" style="background:transparent; border:1px solid rgba(184,115,51,0.4); color:var(--brass); font-size:0.65rem; padding:5px 10px; border-radius:3px; cursor:pointer; font-family:'Special Elite',serif; margin-left:6px;" title="Reset gateway token">
+          🔑 Token
+        </button>
+      </div>
+
+      <div id="chat-messages">
+        <div class="sys-msg">─── Telegraph line open — awaiting connection ───</div>
+      </div>
+
+      <div id="chat-input-area">
+        <div class="input-wrap">
+          <textarea id="msg-input" placeholder="Type your dispatch…" rows="1"
+                    onkeydown="handleKey(event)"></textarea>
+          <button id="send-btn" onclick="sendMessage()" disabled>
+            ⚡ Send
+          </button>
+        </div>
+        <div class="input-hint">Enter to send · Shift+Enter for new line</div>
+      </div>
+    </section>
+
+    <!-- Bottom Nav (mobile) -->
+    <nav id="bottomnav">
+      <button class="bn-item active" id="bn-personal" onclick="showSection('personal')">
+        <span class="bn-icon">🏠</span>Personal
+      </button>
+      <button class="bn-item" id="bn-dsi" onclick="showSection('dsi')">
+        <span class="bn-icon">🔧</span>DSI
+      </button>
+      <button class="bn-item" id="bn-starlit" onclick="showSection('starlit')">
+        <span class="bn-icon">🌟</span>Starlit
+      </button>
+      <button class="bn-item" id="bn-blitz" onclick="showSection('blitz')">
+        <span class="bn-icon">🔥</span>Blitz
+      </button>
+      <button class="bn-item" id="bn-dispatch" onclick="showSection('dispatch')">
+        <span class="bn-icon">⚡</span>The Wire
+      </button>
+    </nav>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ─── Auto-seed gateway token (always overwrite so modal never blocks) ──────────
+localStorage.setItem('oc_token', 'd9f278b425e680e90631788eedaa5a66a7881e20a153edf5');
+
+// ─── Section Navigation ───────────────────────────────────────────────────────
+const sections  = ['personal', 'dsi', 'starlit', 'blitz', 'dispatch'];
+let currentSection = 'personal';
+
+function showSection(name) {
+  sections.forEach(s => {
+    document.getElementById('section-' + s).classList.toggle('active', s === name);
+    const bn = document.getElementById('bn-' + s);
+    if (bn) bn.classList.toggle('active', s === name);
+    const sn = document.getElementById('snav-' + s);
+    if (sn) sn.classList.toggle('active', s === name);
+  });
+  currentSection = name;
+
+  // Init dispatch on first open
+  if (name === 'dispatch' && !wsInitialized) {
+    initDispatch();
+  }
+  return false;
+}
+
+// ─── Clock ────────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now  = new Date();
+  const opts = { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+  const time = now.toLocaleTimeString('en-US', opts);
+  const dateOpts = { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' };
+  const date = now.toLocaleDateString('en-US', dateOpts);
+  const str  = time + '\n' + date;
+
+  const pc = document.getElementById('personal-clock');
+  if (pc) pc.textContent = time;
+
+  const sc = document.getElementById('sidenav-clock');
+  if (sc) sc.textContent = time + ' · ' + date;
+
+  const tc = document.getElementById('topbar-clock');
+  if (tc) tc.innerHTML = time + '<br><span style="font-size:0.6rem;color:var(--brass);">' + date + '</span>';
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ─── WebSocket / Dispatch ─────────────────────────────────────────────────────
+const WS_URL  = (() => {
+  const stored = localStorage.getItem('oc_ws_url');
+  if (stored) return stored;
+  const h = location.hostname;
+  if (h === '192.168.1.26' || h === 'localhost' || h === '127.0.0.1') {
+    return 'ws://192.168.1.26:8384';
+  }
+  return null; // remote — user must set via token modal
+})();
+const AGENT_ID = 'main';
+
+let ws = null;
+let wsInitialized = false;
+let wsReady = false;
+let streamingMsgId = null;
+let streamingEl = null;
+let historyLoaded = false;
+
+function getToken() {
+  return localStorage.getItem('oc_token') || '';
+}
+
+function saveToken() {
+  const urlVal = document.getElementById('ws-url-input').value.trim();
+  if (urlVal) localStorage.setItem('oc_ws_url', urlVal);
+  const val = document.getElementById('token-input').value.trim();
+  if (!val) return;
+  localStorage.setItem('oc_token', val);
+  document.getElementById('token-modal').classList.remove('open');
+  location.reload(); // reload so WS_URL const picks up the saved URL
+}
+
+function clearToken() {
+  localStorage.removeItem('oc_token');
+  const modal = document.getElementById('token-modal');
+  modal.classList.add('open');
+  document.getElementById('token-input').value = '';
+  const savedUrl = localStorage.getItem('oc_ws_url') || '';
+  document.getElementById('ws-url-input').value = savedUrl;
+  if (ws) ws.close();
+}
+
+function initDispatch() {
+  wsInitialized = true;
+  const token = getToken();
+  if (!token || !WS_URL) {
+    const modal = document.getElementById('token-modal');
+    const savedUrl = localStorage.getItem('oc_ws_url') || '';
+    document.getElementById('ws-url-input').value = savedUrl;
+    if (!WS_URL && !savedUrl) {
+      document.getElementById('ws-url-input').value = 'ws://192.168.1.26:8384';
+    }
+    modal.classList.add('open');
+  } else {
+    initWS();
+  }
+}
+
+function setWSStatus(state, text) {
+  const dot  = document.getElementById('ws-dot');
+  const txt  = document.getElementById('ws-status-text');
+  dot.className  = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+function initWS() {
+  if (!WS_URL) {
+    setWSStatus('error', 'No gateway URL — click to configure');
+    return;
+  }
+  if (ws) { try { ws.close(); } catch(e) {} }
+  setWSStatus('connecting', 'Connecting…');
+
+  try {
+    ws = new WebSocket(WS_URL);
+  } catch(e) {
+    setWSStatus('error', 'Failed: ' + e.message);
+    appendSysMsg('⚠ Could not create WebSocket: ' + e.message);
+    return;
+  }
+
+  ws.onopen = () => {
+    setWSStatus('connecting', 'Authenticating…');
+    const token = getToken();
+    ws.send(JSON.stringify({
+      type: 'connect',
+      params: { auth: { token } }
+    }));
+  };
+
+  ws.onmessage = (evt) => {
+    let msg;
+    try { msg = JSON.parse(evt.data); } catch(e) { return; }
+    handleWSMessage(msg);
+  };
+
+  ws.onerror = (e) => {
+    setWSStatus('error', 'Wire error');
+    appendSysMsg('⚠ Telegraph line error — check gateway at ' + WS_URL);
+  };
+
+  ws.onclose = (e) => {
+    wsReady = false;
+    document.getElementById('send-btn').disabled = true;
+    if (e.code === 1000) {
+      setWSStatus('error', 'Disconnected');
+    } else {
+      setWSStatus('error', 'Wire down (code ' + e.code + ')');
+      appendSysMsg('⚡ Line dropped — use Reconnect to restore.');
+    }
+  };
+}
+
+function handleWSMessage(msg) {
+  // Connection ack
+  if (msg.type === 'connected' || (msg.type === 'connect' && msg.ok !== false)) {
+    wsReady = true;
+    setWSStatus('connected', 'Connected · Ruby online');
+    document.getElementById('send-btn').disabled = false;
+    appendSysMsg('─── Wire connected — Ruby Lee Lambert is on the line ───');
+    if (!historyLoaded) {
+      historyLoaded = true;
+      loadHistory();
+    }
+    return;
+  }
+
+  // Auth error
+  if (msg.type === 'error' && msg.code === 'AUTH') {
+    setWSStatus('error', 'Auth failed');
+    appendSysMsg('⚠ Authentication failed — check your token.');
+    clearToken();
+    return;
+  }
+
+  // History response
+  if (msg.type === 'chat.history') {
+    const items = (msg.messages || msg.data || []);
+    if (items.length) {
+      appendSysMsg('─── Last ' + items.length + ' dispatches ───');
+      items.forEach(renderHistoryItem);
+    }
+    return;
+  }
+
+  // Chat stream events
+  if (msg.type === 'chat') {
+    handleChatEvent(msg);
+    return;
+  }
+
+  // OK acks
+  if (msg.type === 'ok' || msg.ok === true) return;
+}
+
+function handleChatEvent(msg) {
+  const ev = msg.event || msg;
+  const role = ev.role || (ev.from === 'agent' ? 'agent' : 'user');
+  const evType = ev.type || 'message';
+
+  if (evType === 'stream_start' || (evType === 'chunk' && !streamingMsgId)) {
+    const id = 'msg-' + Date.now();
+    streamingMsgId = id;
+    const el = renderMessage({ role: 'agent', content: ev.content || ev.text || '', id, streaming: true });
+    streamingEl = el ? el.querySelector('.msg-bubble') : null;
+    return;
+  }
+
+  if (evType === 'chunk' && streamingMsgId) {
+    if (streamingEl) {
+      streamingEl.textContent = (streamingEl.textContent || '') + (ev.content || ev.text || '');
+      scrollToBottom();
+    }
+    return;
+  }
+
+  if (evType === 'stream_end') {
+    if (streamingEl) {
+      const wrap = streamingEl.closest('.msg-wrap');
+      if (wrap) wrap.classList.remove('msg-streaming');
+    }
+    streamingMsgId = null;
+    streamingEl = null;
+    return;
+  }
+
+  // Complete message
+  if (evType === 'message' || evType === 'complete') {
+    if (streamingMsgId) {
+      if (streamingEl) {
+        const finalText = ev.content || ev.text || streamingEl.textContent;
+        streamingEl.textContent = finalText;
+        const wrap = streamingEl.closest('.msg-wrap');
+        if (wrap) wrap.classList.remove('msg-streaming');
+      }
+      streamingMsgId = null;
+      streamingEl = null;
+    } else {
+      renderMessage({ role, content: ev.content || ev.text || '' });
+    }
+    return;
+  }
+}
+
+function loadHistory() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  ws.send(JSON.stringify({
+    type: 'chat.history',
+    agentId: AGENT_ID,
+    limit: 20
+  }));
+}
+
+function renderHistoryItem(item) {
+  const role = item.role === 'assistant' ? 'agent' : (item.role || 'user');
+  renderMessage({
+    role,
+    content: item.content || item.text || '',
+    time: item.timestamp || item.createdAt
+  });
+}
+
+function renderMessage({ role, content, id, streaming, time }) {
+  const container = document.getElementById('chat-messages');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap ' + (role === 'agent' ? 'agent' : 'user');
+  if (streaming) wrap.classList.add('msg-streaming');
+  if (id) wrap.id = id;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  if (role === 'agent') {
+    label.innerHTML = '⭐ R.L.L.';
+  } else {
+    label.innerHTML = '📡 Dispatch';
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = content;
+
+  const timeEl = document.createElement('div');
+  timeEl.className = 'msg-time';
+  if (time) {
+    const d = new Date(time);
+    timeEl.textContent = d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+  } else {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true });
+  }
+
+  wrap.appendChild(label);
+  wrap.appendChild(bubble);
+  wrap.appendChild(timeEl);
+  container.appendChild(wrap);
+  scrollToBottom();
+  return wrap;
+}
+
+function appendSysMsg(text) {
+  const container = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.className = 'sys-msg';
+  el.textContent = text;
+  container.appendChild(el);
+  scrollToBottom();
+}
+
+function scrollToBottom() {
+  const c = document.getElementById('chat-messages');
+  c.scrollTop = c.scrollHeight;
+}
+
+function generateId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function sendMessage() {
+  if (!wsReady || !ws || ws.readyState !== WebSocket.OPEN) {
+    appendSysMsg('⚠ Wire not connected — use Reconnect.');
+    return;
+  }
+  const input = document.getElementById('msg-input');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  // Render user bubble immediately
+  renderMessage({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+
+  ws.send(JSON.stringify({
+    type: 'chat.send',
+    agentId: AGENT_ID,
+    message: text,
+    idempotencyKey: generateId()
+  }));
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+  // Auto-resize textarea
+  setTimeout(() => {
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }, 0);
+}
+
+function reconnectWS() {
+  historyLoaded = false;
+  const token = getToken();
+  if (!token) {
+    document.getElementById('token-modal').classList.add('open');
+  } else {
+    initWS();
+  }
+}
+
+// Enter key in token modal
+document.getElementById('token-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveToken();
+});
+
+// ─── Houston Sales Blitz Tracker ─────────────────────────────────────────────
+const BLITZ_KEY = 'oc_blitz_leads';
+
+function loadBlitzLeads() {
+  try { return JSON.parse(localStorage.getItem(BLITZ_KEY)) || []; }
+  catch(e) { return []; }
+}
+
+function saveBlitzLeads(leads) {
+  localStorage.setItem(BLITZ_KEY, JSON.stringify(leads));
+}
+
+const STATUS_META = {
+  cold:     { label: '❄️ Cold',        cls: 'sp-cold' },
+  contact:  { label: '📞 Contacted',   cls: 'sp-contact' },
+  followup: { label: '🔄 Follow-Up',   cls: 'sp-followup' },
+  meeting:  { label: '📅 Meeting Set', cls: 'sp-meeting' },
+  won:      { label: '✅ Won',          cls: 'sp-won' },
+  lost:     { label: '❌ Lost',         cls: 'sp-lost' },
+};
+
+function renderBlitzTable() {
+  const leads = loadBlitzLeads();
+  const tbody = document.getElementById('blitz-tbody');
+  const emptyRow = document.getElementById('blitz-empty-row');
+
+  // Stats
+  document.getElementById('bs-total').textContent     = leads.length;
+  document.getElementById('bs-contacted').textContent = leads.filter(l => l.status === 'contact').length;
+  document.getElementById('bs-followup').textContent  = leads.filter(l => l.status === 'followup').length;
+  document.getElementById('bs-meeting').textContent   = leads.filter(l => l.status === 'meeting').length;
+  document.getElementById('bs-won').textContent       = leads.filter(l => l.status === 'won').length;
+
+  // Remove old rows (keep empty row)
+  Array.from(tbody.querySelectorAll('tr.blitz-lead-row')).forEach(r => r.remove());
+
+  if (leads.length === 0) {
+    emptyRow.style.display = '';
+    return;
+  }
+  emptyRow.style.display = 'none';
+
+  leads.forEach((lead, idx) => {
+    const meta   = STATUS_META[lead.status] || STATUS_META.cold;
+    const dateStr = lead.date ? new Date(lead.date + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' }) : '—';
+    const tr = document.createElement('tr');
+    tr.className = 'blitz-lead-row';
+    tr.innerHTML = `
+      <td style="color:var(--rope);font-size:0.75rem;">${idx + 1}</td>
+      <td><strong>${esc(lead.company)}</strong></td>
+      <td>${esc(lead.contact || '—')}</td>
+      <td>${lead.phone ? `<a href="tel:${esc(lead.phone)}" style="color:var(--ink-light);text-decoration:none;border-bottom:1px dotted var(--copper);">${esc(lead.phone)}</a>` : '—'}</td>
+      <td><span class="status-pill ${meta.cls}">${meta.label}</span></td>
+      <td style="white-space:nowrap;">${dateStr}</td>
+      <td style="max-width:220px;font-size:0.75rem;color:var(--rope);">${esc(lead.notes || '')}</td>
+      <td style="white-space:nowrap;">
+        <button class="act-btn" onclick="editBlitzLead(${idx})">✏️ Edit</button>
+        <button class="act-btn del" onclick="deleteBlitzLead(${idx})">🗑</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openBlitzModal(editIdx) {
+  document.getElementById('blitz-modal-title').textContent = editIdx !== undefined ? '✏️ Edit Lead' : '➕ Add Lead';
+  document.getElementById('blitz-edit-id').value = editIdx !== undefined ? String(editIdx) : '';
+
+  const leads = loadBlitzLeads();
+  const lead  = editIdx !== undefined ? leads[editIdx] : {};
+
+  document.getElementById('bf-company').value = lead.company || '';
+  document.getElementById('bf-contact').value = lead.contact || '';
+  document.getElementById('bf-phone').value   = lead.phone   || '';
+  document.getElementById('bf-email').value   = lead.email   || '';
+  document.getElementById('bf-status').value  = lead.status  || 'cold';
+  document.getElementById('bf-date').value    = lead.date    || new Date().toISOString().slice(0,10);
+  document.getElementById('bf-notes').value   = lead.notes   || '';
+
+  document.getElementById('blitz-modal').classList.add('open');
+  setTimeout(() => document.getElementById('bf-company').focus(), 80);
+}
+
+function closeBlitzModal() {
+  document.getElementById('blitz-modal').classList.remove('open');
+}
+
+function saveBlitzLead() {
+  const company = document.getElementById('bf-company').value.trim();
+  if (!company) { alert('Company name is required.'); return; }
+
+  const lead = {
+    company,
+    contact: document.getElementById('bf-contact').value.trim(),
+    phone:   document.getElementById('bf-phone').value.trim(),
+    email:   document.getElementById('bf-email').value.trim(),
+    status:  document.getElementById('bf-status').value,
+    date:    document.getElementById('bf-date').value,
+    notes:   document.getElementById('bf-notes').value.trim(),
+  };
+
+  const leads  = loadBlitzLeads();
+  const editId = document.getElementById('blitz-edit-id').value;
+
+  if (editId !== '') {
+    leads[parseInt(editId)] = lead;
+  } else {
+    leads.push(lead);
+  }
+
+  saveBlitzLeads(leads);
+  renderBlitzTable();
+  closeBlitzModal();
+}
+
+function editBlitzLead(idx) { openBlitzModal(idx); }
+
+function deleteBlitzLead(idx) {
+  if (!confirm('Remove this lead?')) return;
+  const leads = loadBlitzLeads();
+  leads.splice(idx, 1);
+  saveBlitzLeads(leads);
+  renderBlitzTable();
+}
+
+function clearBlitz() {
+  if (!confirm('Clear ALL blitz leads? This cannot be undone.')) return;
+  saveBlitzLeads([]);
+  renderBlitzTable();
+}
+
+function exportBlitz() {
+  const leads = loadBlitzLeads();
+  if (!leads.length) { alert('No leads to export.'); return; }
+  const header = ['#','Company','Contact','Phone','Email','Status','Last Contact','Notes'];
+  const rows = leads.map((l, i) => [
+    i+1,
+    l.company, l.contact || '', l.phone || '', l.email || '',
+    (STATUS_META[l.status]||{label:l.status}).label.replace(/[^\w \-]/g,'').trim(),
+    l.date || '', l.notes || ''
+  ]);
+  const csv = [header, ...rows].map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')).join('\n');
+  navigator.clipboard.writeText(csv).then(() => alert('Copied to clipboard as CSV! 🤠')).catch(() => alert('Clipboard access denied.'));
+}
+
+// Close modal on backdrop click
+document.getElementById('blitz-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeBlitzModal();
+});
+
+// Render on load
+renderBlitzTable();
+
+// ─── Master Blitz List Data ──────────────────────────────────────────────────
+const MASTER_LIST = {
+  hot: {
+    icon: '🔥', label: 'HOT — Call/Email by Friday May 16', color: '#7a2010', border: '#c03020',
+    leads: [
+      { num:1,  name:'Bruce Duran',         company:'Oak Leaf Management',               rep:'Nathan',  role:'Chief Building Engineer — manages 5+ buildings', address:'9055 Katy Freeway, Houston 77024', phones:'Cell: 281-212-7465 · Office: 713-771-1992', email:'bduran@oakleafmgmt.com', action:'Call Monday AM. Ask about PM agreement for his portfolio.' },
+      { num:2,  name:'Joe Torres',           company:'I3PM',                              rep:'Nathan',  role:'Chief Engineer', address:'9320 Katy Freeway, Houston 77024', phones:'Cell: 832-282-0239 · Office: 713-600-0789', email:'jtorres@i3interests.com', action:'Call Monday. Active projects or PM needs.' },
+      { num:3,  name:'Will Warden',          company:'2350 N Sam Houston Pkwy E',         rep:'Nathan',  phones:'713-778-0900', situation:'20-ton temp chiller running outside the building RIGHT NOW', action:'Call ASAP — rental, repair, or replacement?' },
+      { num:4,  name:'Candice Hathaway / Jessica Warman / Sony Gonzalez', company:'363 N Sam Houston', rep:'Nathan', situation:'Active plumbing need — cast iron pump, floor leaks', phones:'Candice: 713-322-9136 · Jessica: 714-545-3406 · Sony: 832-513-3966', email:'candice@realty.com · jwarman@realty.com · sonny@realty.com', action:'Visit Mon/Wed, lead with the cast iron pump.' },
+      { num:5,  name:'Joshua Ashlock',       company:'UT MD Anderson Cancer Center',      rep:'Carter',  role:'Director of Building Systems', address:'1515 Holcombe Blvd, Houston 77030', phones:'(887) 632-6789', email:'jashlock@mdanderson.org', action:'Email + call — request a meeting.' },
+      { num:6,  name:'Dennis Ford',          company:"Texas Children's Hospital",         rep:'Carter',  role:'Facilities Director', address:'6621 Fannin St, Houston 77030', phones:'(832) 824-1000', email:'dford@texaschildrens.org', action:"Email intro, reference Carter's visit. Goal: approved vendor list." },
+      { num:7,  name:'Ahmed Abdul Qadir',    company:'Texas Medical Center',              rep:'Carter',  role:'Facilities Manager', address:'6550 Bertner Ave, Houston', phones:'(713) 791-6454', action:'Call — service needs and vendor qualification process.' },
+      { num:8,  name:'Dimitrios Dimitriadis', company:'Memorial Hermann Medical Center',  rep:'Nathan',  role:'Facilities Manager', address:'921 Gessner Rd, Houston 77024', phones:'713-242-3871', email:'Dimitrios.Dimitriadis@memorialhermann.org', notes:'Access: East tower → past gift shop → go east → blue carpet → Mission Control → facilities room.', action:'Send intro email. Goal: approved vendor list.' },
+      { num:9,  name:'Jason Berrio',         company:'TECO / Thermal Energy Corporation', rep:'Carter',  role:'VP Plant Operations', situation:'Runs district energy for the entire TMC campus', action:'Locate via TECO main line or LinkedIn. Biggest long-cycle account in Houston.' },
+      { num:10, name:'Mauricio Iraheta',     company:'American First Bank Tower — Hexagon CRE', rep:'Chance', role:'Chief Engineer', address:'9999 Bellaire Blvd, Houston 77036', phones:'888-999-3910 ext 103', email:'mfi@hexagoncre.com · Alejandro Haiek (Chief PM): ah@hexagoncre.com', situation:'(4) 19-yr-old Carrier air-cooled chillers. Paying ~$k/compressor. Gets 3 bids — ACTIVELY considering full replacement.', action:"Email Mauricio this week. Reference Chance's visit, offer replacement assessment + budgetary quote.", best:true },
+      { num:11, name:'Jorge Figueroa',       company:'The Preserve (hi-reit.com)',        rep:'Chance',  role:'Property Manager', email:'jfigueroa@hi-reit.com', situation:'Just bought a multi-building property — needs quote for cooling tower pumps + other work. He asked for a callback NEXT WEEK.', action:'Call/email by Monday May 18. He is expecting us.' },
+      { num:12, name:'Julie Smith',          company:'Solace Glen Memory Care',           rep:'Chance',  role:'Director', address:'6327 Cypresswood Dr, Spring TX 77379', phones:'O: 281-374-1750 · C: 346-695-2336', email:'administrator@solaceglencypresswood.com', situation:'Wants to fill out new customer form — she asked for it.', action:'Email new customer form + call to confirm.' },
+      { num:13, name:'Salvador De La Cruz',  company:'Havenwood Office Park — SVN-J. Beard RE', rep:'Chance', role:'Lead Engineer', address:'25700 I-45 North, Spring 77386 (250k SF Class A LEED Silver)', phones:'281-367-2220 ext 157', email:'Salvador.delacruz@svn.com', situation:'Open to lunch. SVN manages multiple Class A buildings — portfolio relationship possible.', action:'Email + call Monday. Invite to lunch.' },
+      { num:14, name:'Jose Contreras',       company:'Cushman & Wakefield (10375 Richmond)', rep:'Chance', role:'Operating Engineer', email:'Jose.contreras1@cushwake.com', situation:'DSI works with C&W in San Antonio. Jose will intro DSI to Christopher (Dir of Engineering) — warm handoff ready.', action:'Email Jose ASAP. Reference DSI San Antonio work with Cushman.' },
+      { num:15, name:'Chris Allan',          company:'Tannos Property Management',        rep:'Chance',  role:'Director of Field Operations', address:'1715 S Friendswood Dr Ste 201, Friendswood TX 77546', phones:'O: 281-993-5502 · C: 713-254-8512', email:'callan@tannosgroup.com', action:'Call this week. Ask about service contractors and open opportunities.' },
+      { num:16, name:'Mike Samarripa',       company:'PAM Rehab',                         rep:'Chance',  address:'110 E Medical Center Blvd, Webster TX 77598', email:'msamarripa@pamrehab.com', action:"Email intro, reference Chance's visit." },
+    ]
+  },
+  warm: {
+    icon: '🟡', label: 'WARM — Follow Up by May 21', color: '#6a4010', border: '#c08020',
+    leads: [
+      { num:1,  name:'Marcus Johnican',                    company:'Braun Enterprises',                          rep:'Nathan',  address:'5151 Katy Fwy 77007', phones:'713-255-5252 x59', email:'mjohnican@braunenterprises.com' },
+      { num:2,  name:'Michelle Arredondo + Rudy Matamoros', company:'Lincoln Property Group',                    rep:'Nathan',  address:'16945 N Chase Ste 150', phones:'Michelle: 336-686-6357 · Rudy: 832-853-2261', email:'marredondo@lpc.com · rmatamoros@lpc.com', action:'Call Rudy.' },
+      { num:3,  name:'Jack Brown',                         company:'Saber Street Realty',                       rep:'Nathan',  address:'8731 Katy Fwy 77024', phones:'281-748-4768', email:'jack.brown@saberstreet.com' },
+      { num:4,  name:'Jared Dubin',                        company:'Intera Properties',                         rep:'Nathan',  address:'5750 N Sam Houston Pkwy', phones:'713-544-9900' },
+      { num:5,  name:'Kate Bride',                         company:'Metro National',                            rep:'Nathan',  address:'960 Memorial City Way Ste 300', email:'kate.bride@metronational.com' },
+      { num:6,  name:'Tiffany Che',                        company:'Tarantino Properties',                      rep:'Nathan',  address:'260 N Sam Houston Pkwy', phones:'713-974-4292' },
+      { num:7,  name:'Walter Menuez',                      company:'Colliers / West by NW Main',                rep:'Carter',  address:'6315 West by NW Blvd 77040', phones:'(713) 830-2169' },
+      { num:8,  name:'Ben Condara',                        company:'Colliers / West by NW Bldg 2 + 9001 Jameel Rd', rep:'Carter', phones:'(713) 830-2155', notes:'One call covers 2 buildings.' },
+      { num:9,  name:'Melinda Bell',                       company:'Tarantino / Fairbanks BP',                  rep:'Carter',  address:'14300 NW Freeway 77040', phones:'(713) 690-1188', email:'mbell@tarantino.com' },
+      { num:10, name:'Michael Gallo',                      company:'VSC Properties / Glenborough Tower',        rep:'Chance',  address:'100 Glenborough Dr 77067', phones:'(832) 353-7280', email:'mgallo@vscmgt.com', situation:'Needs cooling tower but no budget — stay in touch, follow up in 30 days.' },
+      { num:11, name:'Mel Harleystraughn',                 company:'1150 Gemini',                               rep:'Chance',  email:'melharleystraughn@yahoo.com', situation:'Management change end of May — follow up in June.' },
+      { num:12, name:'Arturo (Engineer)',                  company:'Tarantino / Nanes Professional Bldg',       rep:'Chance',  notes:'No direct contact — reach via Tarantino main line.' },
+    ]
+  },
+  cool: {
+    icon: '🧊', label: 'COOL — 30-Day Drip', color: '#183060', border: '#4060a0',
+    leads: [
+      { name:'5225 Katy Fwy',                                rep:'Nathan', phones:'713-489-5024',   notes:'Contact: Susan Rosha' },
+      { name:'1283-1297 Post Oak / Prologis',                rep:'Nathan', phones:'713-682-2292' },
+      { name:'9110 Katy Fwy / Kelsey Seybold',              rep:'Nathan', phones:'713-442-5500',   notes:'Ask for facilities' },
+      { name:'Boxer Properties portfolio',                   rep:'Nathan', phones:'(713) 777-7368', notes:'340-350 N Sam Houston, 440 Benmar, 16770 Imperial Valley' },
+      { name:'3663 N Sam Houston / Avison Young',            rep:'Nathan' },
+      { name:'1400 N Sam Houston / JLL',                    rep:'Nathan', phones:'713-888-4095' },
+      { name:'990 Town & Country Blvd',                     rep:'Nathan', notes:'Need direct contact' },
+      { name:'Jeff Mosely / Memorial Hermann TMC',           rep:'Carter', role:'Senior Chief Facilities Officer', address:'6411 Fannin St', notes:'Find via LinkedIn' },
+      { name:'616 FM 1960',                                 rep:'Chance', phones:'281-730-1000', email:'Info616property@gmail.com', notes:'Contact: Ana Aguilar' },
+      { name:'6605 Cypresswood LTD',                        rep:'Chance', phones:'281-374-5600', notes:'Sandra Galleo, Centra Partners' },
+      { name:'18333 Egret Bay Blvd / Kashi Atrium LLC',     rep:'Chance', notes:'Look up Landpark Commercial / Brad Beleiff' },
+      { name:'El Camino 1 & 2, 17629/17625 El Camino',     rep:'Chance', notes:'713 CRE / Brad Beleiff' },
+      { name:'North Atrium, 11777B Katy Fwy',               rep:'Chance', notes:'Everest PM main line' },
+      { name:'Championwoods Office Centre, 6601 Cypresswood', rep:'Chance', phones:'281-413-4475', notes:'Norma Rodriguez' },
+    ]
+  },
+  skip: {
+    icon: '🚫', label: 'SKIP', color: '#2a2018', border: 'rgba(100,80,60,0.5)',
+    leads: [
+      { name:'12450 Greenspoint', notes:'For sale' },
+      { name:'Glenborough Atrium II', notes:'Empty' },
+      { name:'1000 FM 1960 W', notes:'Not interested' },
+      { name:'6401 Cypresswood', notes:'Strip center' },
+      { name:'2530 Old Louetta Loop', notes:'Storage units' },
+    ]
+  }
+};
+
+function renderMasterList() {
+  const container = document.getElementById('master-list-accordion');
+  if (!container) return;
+  container.innerHTML = '';
+
+  Object.values(MASTER_LIST).forEach(tier => {
+    const wrap = document.createElement('div');
+    wrap.className = 'blitz-tier';
+    wrap.style.cssText = `border:2px solid ${tier.border}; margin-bottom:8px; border-radius:4px; overflow:hidden;`;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'blitz-tier-hdr';
+    hdr.style.background = tier.color;
+    hdr.innerHTML = `<span>${tier.icon} ${tier.label}</span><span style="margin-left:auto;font-family:'Special Elite',serif;font-size:0.72rem;letter-spacing:1px;opacity:0.8;">${tier.leads.length} entries</span><span class="blitz-tier-arrow">▼</span>`;
+    hdr.onclick = () => { wrap.classList.toggle('collapsed'); };
+
+    const body = document.createElement('div');
+    body.className = 'blitz-tier-body';
+
+    tier.leads.forEach((lead, i) => {
+      const card = document.createElement('div');
+      card.className = 'blitz-lcard';
+      if (i === tier.leads.length - 1) card.style.borderBottom = 'none';
+
+      let h = `<div class="blitz-ltop">`;
+      if (lead.num)  h += `<span class="blitz-lnum">${lead.num}.</span>`;
+      h += `<span class="blitz-lname">${esc(lead.name||'—')}</span>`;
+      if (lead.company) h += `<span class="blitz-lco">${esc(lead.company)}</span>`;
+      if (lead.best)    h += `<span class="blitz-lbest">⭐ BEST LEAD</span>`;
+      if (lead.rep)     h += `<span class="blitz-lrep">${esc(lead.rep)}</span>`;
+      h += `</div>`;
+
+      h += `<div class="blitz-lbody" style="padding-left:${lead.num?'26':'0'}px;">`;
+      if (lead.role)      h += `<div>👤 ${esc(lead.role)}</div>`;
+      if (lead.address)   h += `<div>📍 ${esc(lead.address)}</div>`;
+      if (lead.phones)    h += `<div>📞 ${esc(lead.phones)}</div>`;
+      if (lead.email)     h += `<div>✉️ ${esc(lead.email)}</div>`;
+      if (lead.situation) h += `<div>ℹ️ <em>${esc(lead.situation)}</em></div>`;
+      if (lead.notes)     h += `<div>📝 ${esc(lead.notes)}</div>`;
+      if (lead.action)    h += `<div class="blitz-laction">➡️ ${esc(lead.action)}</div>`;
+      h += `</div>`;
+
+      card.innerHTML = h;
+      body.appendChild(card);
+    });
+
+    wrap.appendChild(hdr);
+    wrap.appendChild(body);
+    container.appendChild(wrap);
+  });
+}
+
+renderMasterList();
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+// Auto-connect dispatch if token exists and dispatch is active on load
+// (Otherwise connects on first section visit)
+const startSection = window.location.hash.replace('#', '') || 'personal';
+if (sections.includes(startSection)) {
+  showSection(startSection);
+}
+</script>
+</body>
+</html>
