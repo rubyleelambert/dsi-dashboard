@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DSI Hiring">
+<title>DSI Hiring</title>
+<style>
+:root {
+  --bg: #0f1117; --surface: #1a1f2e; --border: #2d3748;
+  --text: #e2e8f0; --muted: #718096; --dim: #4a5568;
+  --blue: #63b3ed; --green: #68d391; --red: #fc8181;
+  --yellow: #f6c90e; --purple: #b794f4; --orange: #f6ad55;
+  --teal: #4fd1c5; --nav-h: 64px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
+
+/* Views */
+.view { position: fixed; inset: 0; bottom: var(--nav-h); overflow-y: auto; display: none; -webkit-overflow-scrolling: touch; }
+.view.active { display: block; }
+
+/* Nav */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: #13161f; border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 10px; font-weight: 600; color: var(--dim); cursor: pointer; border: none; background: none; padding: 0; }
+.nav-btn.active { color: var(--blue); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* Header */
+.page-header { padding: 16px 16px 12px; border-bottom: 1px solid var(--border); background: #13161f; position: sticky; top: 0; z-index: 10; }
+.page-header h1 { font-size: 17px; font-weight: 700; }
+.page-header p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* Stat cards */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 12px; text-align: center; }
+.stat-card .sv { font-size: 28px; font-weight: 800; line-height: 1; }
+.stat-card .sl { font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* Pipeline */
+.section { padding: 0 14px 14px; }
+.section-title { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+.pipeline { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.pipeline::-webkit-scrollbar { display: none; }
+.pipe-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 90px; text-align: center; flex-shrink: 0; }
+.pipe-card .pn { font-size: 24px; font-weight: 800; }
+.pipe-card .pl { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+/* Action card */
+.action-card { margin: 0 14px 14px; background: #1b1824; border: 1px solid #4a3f6b; border-radius: 12px; padding: 14px; }
+.action-card .at { font-size: 13px; font-weight: 700; color: var(--purple); margin-bottom: 6px; }
+.action-card .ab { font-size: 12px; color: #a0aec0; line-height: 1.6; }
+.action-card .ab strong { color: var(--purple); }
+
+/* Search */
+.search-wrap { padding: 12px 14px; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+.search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 15px; outline: none; }
+.search-input::placeholder { color: var(--dim); }
+
+/* Filter pills */
+.filter-pills { display: flex; gap: 8px; padding: 0 14px 12px; overflow-x: auto; scrollbar-width: none; }
+.filter-pills::-webkit-scrollbar { display: none; }
+.pill { font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); white-space: nowrap; cursor: pointer; flex-shrink: 0; }
+.pill.active { background: var(--surface); color: var(--text); border-color: var(--dim); }
+
+/* Candidate list */
+.cand-list { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.cand-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; transition: border-color 0.15s; }
+.cand-card:active { border-color: var(--blue); }
+.cand-card.highlight { border-color: #4a3f6b; background: #1b1824; }
+.cand-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.cand-name { font-size: 15px; font-weight: 700; }
+.cand-company { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.cand-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.cand-notes { font-size: 11px; color: var(--dim); flex: 1; margin-right: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Badges */
+.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; flex-shrink: 0; }
+.b-pending    { background: #1e2d50; color: #90cdf4; }
+.b-emailed    { background: #1a3328; color: #68d391; }
+.b-replied    { background: #0d3320; color: #48bb78; }
+.b-screen     { background: #12302e; color: #4fd1c5; }
+.b-interview  { background: #1e2a4a; color: #76e4f7; }
+.b-offer      { background: #3d2a10; color: #f6ad55; }
+.b-hired      { background: #0d3320; color: #38a169; }
+.b-declined   { background: #2d1b1b; color: #fc8181; }
+.b-nopursue   { background: #2a2010; color: #cbd5e0; }
+.b-bounce     { background: #3d1515; color: #fc8181; }
+.b-inbound    { background: #2a1e40; color: #b794f4; }
+
+/* Empty state */
+.empty { text-align: center; padding: 48px 24px; color: var(--dim); }
+.empty svg { margin-bottom: 12px; opacity: 0.4; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: flex-end; }
+.modal-overlay.open { display: flex; }
+.modal { background: #13161f; border-radius: 20px 20px 0 0; width: 100%; max-height: 92vh; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom); }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.modal-header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h2 { font-size: 17px; font-weight: 700; }
+.modal-close { background: var(--surface); border: none; color: var(--muted); font-size: 18px; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-body { padding: 16px 20px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.field input, .field select, .field textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 15px; outline: none; font-family: inherit; }
+.field textarea { resize: none; min-height: 80px; }
+.field select { appearance: none; -webkit-appearance: none; }
+.btn-row { display: flex; gap: 10px; margin-top: 16px; padding-bottom: 8px; }
+.btn { flex: 1; padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; }
+.btn-primary { background: var(--blue); color: #0f1117; }
+.btn-danger { background: #3d1515; color: var(--red); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+/* Add form view */
+.add-form { padding: 16px; }
+
+/* Reply button on card */
+.replied-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 4px; }
+
+/* Count badge */
+.count-badge { background: var(--surface); color: var(--muted); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+
+/* Auth overlay */
+#auth-overlay { position: fixed; inset: 0; z-index: 9999; background: #0f1117; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 32px; }
+#auth-overlay.hidden { display: none; }
+.auth-logo { width: 72px; height: 72px; background: linear-gradient(135deg,#63b3ed,#b794f4); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+.auth-logo svg { width: 38px; height: 38px; color: #fff; }
+.auth-title { font-size: 24px; font-weight: 800; margin-bottom: 6px; text-align: center; }
+.auth-sub { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 36px; }
+.auth-btn { display: flex; align-items: center; gap: 12px; background: #fff; color: #111; font-size: 15px; font-weight: 600; padding: 14px 24px; border-radius: 12px; border: none; cursor: pointer; width: 100%; max-width: 300px; justify-content: center; }
+.auth-btn svg { width: 22px; height: 22px; flex-shrink: 0; }
+.auth-btn:active { opacity: 0.85; }
+.auth-err { margin-top: 12px; font-size: 13px; color: var(--red); text-align: center; display: none; }
+#app-shell { display: none; }
+#app-shell.visible { display: block; }
+
+/* ── WRITE TAB ─────────────────────────────────────────────── */
+.write-ta { width:100%; background:transparent; border:none; color:var(--text); font-size:15px; line-height:1.75; resize:none; outline:none; font-family:inherit; min-height:160px; padding:14px; }
+.write-ta::placeholder { color:var(--dim); }
+.w-ch-strip { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+.w-ch-strip::-webkit-scrollbar { display:none; }
+.w-ch-pill { font-size:12px; font-weight:600; padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); white-space:nowrap; cursor:pointer; flex-shrink:0; }
+.w-ch-pill.active { border-color:var(--blue); color:var(--blue); background:rgba(99,179,237,0.1); }
+.w-tell-row { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg); border-radius:8px; }
+.w-tbadge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; }
+.wt-high { background:rgba(252,129,129,0.15); color:var(--red); }
+.wt-med  { background:rgba(246,201,14,0.15); color:var(--yellow); }
+.wt-low  { background:rgba(99,179,237,0.15); color:var(--blue); }
+.w-spinner { width:15px; height:15px; border:2px solid rgba(15,17,23,0.25); border-top-color:#0f1117; border-radius:50%; animation:spin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:4px; }
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>
+  </div>
+  <div class="auth-title">DSI Hiring</div>
+  <div class="auth-sub">Enter password to continue</div>
+  <input id="pw-input" type="password" placeholder="Password" style="width:100%;max-width:300px;background:#1a1f2e;border:1px solid #2d3748;border-radius:12px;padding:14px 18px;color:#e2e8f0;font-size:17px;outline:none;margin-bottom:12px;text-align:center;" onkeydown="if(event.key==='Enter')checkPassword()">
+  <button class="auth-btn" id="signin-btn" onclick="checkPassword()" style="background:#63b3ed;color:#0f1117;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Unlock
+  </button>
+  <div class="auth-err" id="auth-err">Incorrect password. Try again.</div>
+</div>
+
+<div id="app-shell">
+<!-- HOME VIEW -->
+<div class="view active" id="view-home">
+  <div class="page-header">
+    <h1>DSI Hiring Dashboard</h1>
+    <p id="home-sub">Loading...</p>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="section">
+    <div class="section-title">Pipeline</div>
+    <div class="pipeline" id="pipeline"></div>
+  </div>
+  <div id="action-area"></div>
+</div>
+
+<!-- CANDIDATES VIEW -->
+<div class="view" id="view-candidates">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <h1>Candidates</h1>
+      <span class="count-badge" id="cand-count">52</span>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" type="search" placeholder="Search name, company, notes…" autocomplete="off">
+  </div>
+  <div class="filter-pills" id="filter-pills"></div>
+  <div class="cand-list" id="cand-list"></div>
+</div>
+
+<!-- ADD VIEW -->
+<div class="view" id="view-add">
+  <div class="page-header"><h1>Add Candidate</h1></div>
+  <div class="add-form">
+    <div class="field"><label>Full Name *</label><input id="add-name" type="text" placeholder="First Last"></div>
+    <div class="field"><label>Company</label><input id="add-company" type="text" placeholder="Company name"></div>
+    <div class="field"><label>Title</label><input id="add-title" type="text" placeholder="Job title"></div>
+    <div class="field"><label>Email</label><input id="add-email" type="email" placeholder="email@example.com"></div>
+    <div class="field"><label>Phone</label><input id="add-phone" type="tel" placeholder="(000) 000-0000"></div>
+    <div class="field"><label>Source</label>
+      <select id="add-source">
+        <option>Juicebox</option><option>LinkedIn</option><option>Skeet Referral</option>
+        <option>Craft Services</option><option>Direct Apply</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Status</label><select id="add-status"></select></div>
+    <div class="field"><label>Notes</label><textarea id="add-notes" placeholder="Background, fit notes, follow-up actions…"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="clearAddForm()">Clear</button>
+      <button class="btn btn-primary" onclick="saveNewCandidate()">Add Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE VIEW -->
+<div class="view" id="view-write">
+  <div class="page-header">
+    <h1>Message Writer</h1>
+    <p>Rewrite text to sound like a real person</p>
+  </div>
+
+  <!-- Key status -->
+  <div style="padding:10px 14px 4px;display:flex;align-items:center;justify-content:space-between;">
+    <span id="w-key-badge" class="badge b-nopursue">No API Key</span>
+    <button class="pill" onclick="showWriteKeyModal()">Set API Key</button>
+  </div>
+
+  <!-- Input -->
+  <div style="padding:10px 14px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Your Draft</span>
+        <span id="w-wc-in" style="font-size:12px;color:var(--dim);">0 words</span>
+      </div>
+      <textarea id="w-input" class="write-ta" placeholder="Paste your email, message, LinkedIn post, or any text here…" oninput="wOnInput()"></textarea>
+    </div>
+  </div>
+
+  <!-- Channel + Actions -->
+  <div style="padding:0 14px 10px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Channel</span>
+      </div>
+      <div style="padding:12px 14px 10px;">
+        <div class="w-ch-strip" id="w-ch-row">
+          <button class="w-ch-pill active" data-wch="">Any</button>
+          <button class="w-ch-pill" data-wch="email">Email</button>
+          <button class="w-ch-pill" data-wch="linkedin">LinkedIn</button>
+          <button class="w-ch-pill" data-wch="twitter">Twitter/X</button>
+          <button class="w-ch-pill" data-wch="sms">Text/SMS</button>
+          <button class="w-ch-pill" data-wch="script">Video Script</button>
+        </div>
+      </div>
+      <div style="padding:0 14px 14px;display:flex;gap:10px;">
+        <button class="btn btn-secondary" style="font-size:14px;padding:11px;" onclick="wRunDetect()">Detect AI</button>
+        <button class="btn btn-primary" id="w-rewrite-btn" style="font-size:14px;padding:11px;" onclick="wRunRewrite()" disabled>✨ Rewrite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detection results -->
+  <div id="w-detect-card" style="display:none;padding:0 14px 10px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">AI Tells Detected</span>
+      </div>
+      <div style="padding:14px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;">
+          <div id="w-score-num" style="font-size:32px;font-weight:800;line-height:1;min-width:64px;"></div>
+          <div style="flex:1;">
+            <div style="height:7px;background:var(--border);border-radius:4px;overflow:hidden;">
+              <div id="w-score-fill" style="height:100%;border-radius:4px;width:0%;transition:width 0.5s ease;"></div>
+            </div>
+            <div id="w-score-desc" style="font-size:12px;color:var(--muted);margin-top:5px;">AI likelihood</div>
+          </div>
+        </div>
+        <div id="w-tells-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div id="w-output-card" style="display:none;padding:0 14px 90px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Rewritten</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="w-wc-out" style="font-size:12px;color:var(--dim);"></span>
+          <button class="pill" onclick="wCopyOutput(this)">Copy</button>
+        </div>
+      </div>
+      <textarea id="w-output-text" readonly style="width:100%;background:transparent;border:none;color:var(--text);font-size:15px;line-height:1.8;padding:14px;resize:none;outline:none;font-family:inherit;min-height:120px;"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- API KEY MODAL (Write tab) -->
+<div class="modal-overlay" id="w-key-modal" onclick="closeWriteKeyModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>Anthropic API Key</h2>
+      <button class="modal-close" onclick="closeWriteKeyModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Saved on this device only. Get yours at <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue);">console.anthropic.com</a></p>
+      <div class="field"><label>API Key</label><input id="w-key-input" type="password" placeholder="sk-ant-…" style="font-family:monospace;font-size:14px;"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="closeWriteKeyModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="wSaveKey()">Save Key</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="nav-home" onclick="showView('home')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Home
+  </button>
+  <button class="nav-btn" id="nav-candidates" onclick="showView('candidates')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75"/><path d="M21 21v-2a4 4 0 00-3-3.87"/></svg>
+    Candidates
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="showView('add')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Add
+  </button>
+  <button class="nav-btn" id="nav-write" onclick="showView('write')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Write
+  </button>
+  <button class="nav-btn" onclick="signOut()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    Sign Out
+  </button>
+</nav>
+
+<!-- CANDIDATE DETAIL MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2 id="modal-title">Candidate</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+</div><!-- /app-shell -->
+
+<script>
+// ── PASSWORD AUTH ─────────────────────────────────────────────────────────────
+const APP_PASSWORD = 'DSI';
+const AUTH_KEY = 'dsi_hiring_auth';
+
+function checkPassword() {
+  const val = document.getElementById('pw-input').value;
+  if (val.toUpperCase() === APP_PASSWORD) {
+    localStorage.setItem(AUTH_KEY, '1');
+    showApp();
+  } else {
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function signOut() {
+  if (confirm('Sign out of DSI Hiring?')) {
+    localStorage.removeItem(AUTH_KEY);
+    showLoginScreen();
+  }
+}
+
+function showApp() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+  document.getElementById('app-shell').classList.add('visible');
+  document.getElementById('home-sub').textContent = 'DSI Hiring — loading data…';
+  renderHome();
+}
+
+function showLoginScreen() {
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  document.getElementById('app-shell').classList.remove('visible');
+}
+
+// ── STATUSES ────────────────────────────────────────────────────────────────
+const STATUSES = [
+  'Pending Outreach','Emailed','Replied','Phone Screen',
+  'Interview Scheduled','Interviewed','Offer Extended',
+  'Hired','Offer Declined','Not Pursuing','Bounced / Dead Email',
+  'Inbound — Pending Decision'
+];
+
+const STATUS_CLASS = {
+  'Pending Outreach':'b-pending','Emailed':'b-emailed','Replied':'b-replied',
+  'Phone Screen':'b-screen','Interview Scheduled':'b-interview',
+  'Interviewed':'b-interview','Offer Extended':'b-offer','Hired':'b-hired',
+  'Offer Declined':'b-declined','Not Pursuing':'b-nopursue',
+  'Bounced / Dead Email':'b-bounce','Inbound — Pending Decision':'b-inbound'
+};
+
+const FILTERS = ['All','Pending Outreach','Emailed','Replied','Phone Screen',
+  'Interview Scheduled','Interviewed','Offer Extended','Hired',
+  'Offer Declined','Not Pursuing','Bounced / Dead Email','Inbound — Pending Decision'];
+
+// ── SEED DATA ────────────────────────────────────────────────────────────────
+const SEED = [
+  {id:1,name:'David Earl',company:'Majestic Air',title:'TBD',email:'TBD',phone:'',source:'LinkedIn',status:'Pending Outreach',notes:'Residential — verify commercial fit'},
+  {id:2,name:'Blake Halter',company:'TBD',title:'TBD',email:'TBD',phone:'',source:'LinkedIn',status:'Pending Outreach',notes:'No company info — LinkedIn only'},
+  {id:3,name:'Ray Garcia',company:'BCH Mechanical',title:'HVAC Sales Rep',email:'TBD',phone:'',source:'LinkedIn',status:'Pending Outreach',notes:'BCH Mechanical FL-based — verify Houston connection'},
+  {id:4,name:'Jeremy Londenberg',company:'RDI Mechanical',title:'Sales Exec / BD Mgr',email:'jeremylondenberg@outlook.com',phone:'',source:'Juicebox',status:'Emailed',notes:'13 yrs sales/BD experience. Emailed 4/30.'},
+  {id:5,name:'Roe Moreno',company:'TBD',title:'TBD',email:'TBD',phone:'',source:'LinkedIn',status:'Pending Outreach',notes:'No public trace — LinkedIn only'},
+  {id:6,name:'John Moore',company:'Raven Mechanical LP',title:'Estimator',email:'john.moore@ravenmechanical.com',phone:'',source:'LinkedIn',status:'Emailed',notes:'Title is Estimator, not Sales — still worth a shot. Emailed 4/30.'},
+  {id:7,name:'Alejandro Ordonez',company:'Polk Mechanical / ABM',title:'Account Manager',email:'alejandrop33@hotmail.com',phone:'',source:'Juicebox',status:'Bounced / Dead Email',notes:'hotmail bounced (full) 4/30. polkmechanical.com bounced (invalid) 5/5 + 5/8. Both emails dead. LinkedIn only path.'},
+  {id:8,name:'Adam Kuskos',company:'HTS Engineering',title:'Systems Sales Engineer',email:'akuskos@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'MEP/HVAC technical sales; Houston. Emailed 4/30.'},
+  {id:9,name:'Gabriel Ordonez',company:'APS Building Services',title:'Account Manager',email:'jesusboost@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Also ABM Industries; Houston-based. Emailed 4/30.'},
+  {id:10,name:'Jamison Alexander',company:'Upchurch',title:'Building Performance Sales Eng',email:'profitwithdigitalmarketing@gmail.com',phone:'',source:'LinkedIn',status:'Not Pursuing',notes:'Applied directly on LinkedIn. Never provided phone number for interview 5/18. Dropped.'},
+  {id:11,name:'Jasen Mummert',company:'Engineering Excellence',title:'Commercial Account Manager',email:'wjmummert@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Consultative sales; territory planning; relationship builder. Emailed 4/30.'},
+  {id:12,name:'John Hinkle',company:'Letsos Company',title:'Service Account Manager',email:'hinklejt86@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Also BD at Charlie\'s Plumbing; hospitality/property mgmt accounts. Emailed 4/30.'},
+  {id:13,name:'Jonathan Da Silva',company:'Hayden Industrial Products',title:'Strategic Account Manager',email:'jdasilva0613@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Engineered heat rejection; data center/industrial. Emailed 4/30.'},
+  {id:14,name:'Maurice Mullins',company:'Way Service',title:'Project Sales Rep',email:'mmhts@hotmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Chiller/VRF/RTU trained; ex-Comfort Systems service mgr. Emailed 4/30.'},
+  {id:15,name:'Miguel Mateo',company:'Har-Con Mechanical',title:'HVAC Account Exec / PM',email:'miguelcmateo@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'10+ yrs HVAC; prev Johnson Controls; CRM experience. Emailed 4/30.'},
+  {id:16,name:'Nathan Sheen',company:'Hudson Technologies',title:'Technical Sales Acct Mgr',email:'nsheen@att.net',phone:'',source:'Juicebox',status:'Emailed',notes:'Prev Daikin Applied; HVAC controls + outside sales. Emailed 4/30.'},
+  {id:17,name:'Ross Kiatta',company:'Sunbelt Rentals',title:'Power & HVAC Sales Rep',email:'ross.kiatta@sunbeltrentals.com',phone:'',source:'Juicebox',status:'Emailed',notes:'yahoo bounced; resent to work email ross.kiatta@sunbeltrentals.com on 5/5. Outside sales; HVAC rental/service focus.'},
+  {id:18,name:'Shannon Jeter',company:'HCL Mechanical Services',title:'Service Account Manager',email:'shannonj@hclmechanicalservices.com',phone:'',source:'Juicebox',status:'Emailed',notes:'grundfos email bounced; resent to hclmechanicalservices.com 5/5. Prev Trane, TD Industries, Carrier, Brandt — deep Houston roots.'},
+  {id:19,name:'Tim Moreland',company:'DAC, Inc.',title:'Service Account Manager',email:'tim-moreland@att.net',phone:'',source:'Juicebox',status:'Emailed',notes:'Servant leader; relationship-driven; Houston HVAC market. Emailed 4/30.'},
+  {id:20,name:'Trey Anderson',company:'Unify Energy Solutions',title:'Sales Service Executive',email:'waterfowlhunts@yahoo.com',phone:'832-882-6684',source:'Juicebox',status:'Emailed',notes:'HVAC/plumbing/electrical service sales. Emailed 4/30.'},
+  {id:21,name:'Tyler Vest',company:'DAC, Inc.',title:'Account Manager / HVAC Svcs',email:'tylerthevest510@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Customer-first mindset; HVAC distribution + oil & gas background. Emailed 4/30.'},
+  {id:22,name:'Ryan Dunkleberger',company:'Herc Rentals',title:'Strategic Account Manager',email:'ryandunkin@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Equipment rental background. Emailed 5/5.'},
+  {id:23,name:'James Knight',company:'Sunbelt Rentals',title:'Strategic Account Manager',email:'jamesknight.spring@outlook.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Equipment rental; Cypress TX. Emailed 5/5.'},
+  {id:24,name:'Aaron Dunning',company:'Way Engineering LTD.',title:'Account Manager',email:'wisewordz86@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Mechanical/engineering background; strong fit. Emailed 5/5.'},
+  {id:25,name:'Avery Neubert',company:'United Rentals',title:'Strategic Account Manager',email:'neubert.avery@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Equipment rental background. Emailed 5/5.'},
+  {id:26,name:'Brandon Blum',company:'Herc Rentals',title:'Strategic Account Manager',email:'bblum1998@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Equipment rental background. Emailed 5/5.'},
+  {id:27,name:'Jeremy Brewer',company:'Rheem Manufacturing',title:'Regional Commercial A/C Sales Eng',email:'jfbrew50@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — commercial HVAC manufacturer\'s rep. Emailed 5/5.'},
+  {id:28,name:'Eric Brunnenmeyer',company:'Har-Con Mechanical',title:'Service Account Manager',email:'ericb@har-con.com',phone:'',source:'Juicebox',status:'Bounced / Dead Email',notes:'Email bounced — no longer at Har-Con. Alt contacts: Matt Ford (matt@har-con.com), Doug Corley (doug@har-con.com).'},
+  {id:29,name:'Clay Condrey',company:'HTS Engineering',title:'System Sales Engineer & Team Lead',email:'claycondrey@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — HVAC systems sales + team lead experience. Emailed 5/5.'},
+  {id:30,name:'Roger Vasquez',company:'HTS Engineering',title:'Commercial RE Account Manager',email:'rogervasquez@verizon.net',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — commercial RE + HVAC engineering. Emailed 5/5.'},
+  {id:31,name:'Devin Crow',company:'HTS Engineering',title:'System Sales Engineer',email:'devincrow@live.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — HVAC systems technical sales. Emailed 5/5.'},
+  {id:32,name:'Brian Perkins',company:'Hajoca Corp',title:'TBD',email:'Briankperk@icloud.com',phone:'713-935-5271',source:'LinkedIn',status:'Not Pursuing',notes:'Replied 5/12 with number 713.935.5271. Cancelled interview, never rescheduled by 5/18. Dropped. Cypress TX.'},
+  {id:33,name:'Ben Rogers',company:'DXP Enterprises',title:'Account Manager – TX Gulf Coast',email:'brogers114@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Industrial distribution/services; Gulf Coast territory mgmt. Emailed 5/11.'},
+  {id:34,name:'Kern Tucker',company:'Hunton Trane',title:'Operations Management Leader',email:'kerntt@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Hunton is major Trane distributor TX — strong HVAC background. Emailed 5/11.'},
+  {id:35,name:'Rachel Haines',company:'S&S HVAC Equipment',title:'Sales Engineer',email:'rachel.l.downey@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'HVAC equipment sales engineering; Houston. Emailed 5/11.'},
+  {id:36,name:'Mark Bell',company:'Hansa-Flex USA',title:'Sales & Business Unit Manager',email:'mark.bell2.0@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Industrial/hydraulic — verify HVAC crossover. Emailed 5/11.'},
+  {id:37,name:'Dustin Schultz',company:'CS&P Technologies LP',title:'Sales Application Engineer',email:'dschultz317@hotmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Industrial/process engineering sales; Houston. Emailed 5/11.'},
+  {id:38,name:'Charnee Francis',company:"Derryberry's Mechanical",title:'Service Account Manager',email:'frances_cf@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — direct mechanical contractor background; Houston. Emailed 5/11.'},
+  {id:39,name:'Tyler Bush',company:'APS Building Services',title:'Account Manager',email:'tyler.bush92@icloud.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Building services account mgmt; Houston. Emailed 5/11.'},
+  {id:40,name:'Rene Yzaguirre',company:'Carrier',title:'Executive Account Manager',email:'reneisaguirre@hotmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — Carrier HVAC executive account mgmt; Houston. Emailed 5/11.'},
+  {id:41,name:'Jason Sabayrac',company:'Liquid Environmental Solutions',title:'Regional Account Solutions Mgr',email:'jsabairac@hotmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Regional account mgmt — verify HVAC/mechanical fit. Emailed 5/11.'},
+  {id:42,name:'Daniel Villalobos',company:'Enerflex LTD.',title:'Procurement Associate',email:'dvillalobosnew@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Procurement background — verify sales aptitude/interest. Emailed 5/11.'},
+  {id:43,name:'David Curtis',company:'Sunbelt Rentals',title:'Territory Account Manager',email:'dacurtis777@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Territory account mgmt; equipment rental; Houston. Emailed 5/11.'},
+  {id:44,name:'Russell Johnson',company:'Honeywell',title:'Application / System Sales Engineer',email:'russellalanjohnson91@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — Honeywell systems/application sales engineering; Houston. Emailed 5/11.'},
+  {id:45,name:'Jacob McLaney',company:'Conco Services LLC',title:'Senior Account Manager',email:'jacobmclaney@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Senior acct mgmt; Conco is industrial tube cleaning; Houston. Emailed 5/11.'},
+  {id:46,name:'Andi Hall',company:'Houk Air Conditioning',title:'Commercial Account Manager – Houston',email:'andi.b.hall@outlook.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Strong fit — commercial HVAC account mgmt; Crosby TX. Emailed 5/11.'},
+  {id:47,name:'Terrel Antoine',company:'Johnson Controls',title:'HVAC Technical Custom Quotes Sales',email:'TBD — LinkedIn only',phone:'',source:'Juicebox',status:'Emailed',notes:'12 yrs exp; also CaptiveAire; Katy TX; open to work. Emailed 5/12.'},
+  {id:48,name:'William Morgan',company:'United Rentals',title:'Outside Sales Rep — Power/HVAC',email:'TBD — LinkedIn only',phone:'',source:'Juicebox',status:'Emailed',notes:'Houston TX; open to work; equipment rental HVAC. Emailed 5/12.'},
+  {id:49,name:'Nick Zuniga',company:'Johnson Controls',title:'HVAC Account Sales Rep',email:'TBD — LinkedIn only',phone:'',source:'Juicebox',status:'Emailed',notes:'Sugar Land TX; open to work. Emailed 5/12.'},
+  {id:50,name:'Richard Robeson',company:'ARS/Rescue Rooter',title:'HVAC Sales Rep',email:'TBD — LinkedIn only',phone:'',source:'Juicebox',status:'Emailed',notes:'Houston TX; residential background (ARS) — weaker commercial fit. Emailed 5/12.'},
+  {id:51,name:'Garrett Dorram',company:'TBD',title:'TBD',email:'garrett.dorram7@gmail.com',phone:'',source:'Skeet Referral',status:'Offer Declined',notes:'Skeet referral. Resume 5/13, in-person interview 5/13. Offer extended and rejected 5/18.'},
+  {id:52,name:'Chris Munz',company:'Houston HVAC Market',title:'Service Sales Executive',email:'TBD — submitted via recruiter',phone:'',source:'Craft Services',status:'Inbound — Pending Decision',notes:'Submitted by AJ Hollrah (AJ.Hollrah@craftservices.co). 20+ yrs commercial HVAC Houston. Senior service sales, established book of business. Healthcare/education focus. $2.5M new business target 2026. Available for interview this week per recruiter.'},
+  {id:53,name:'Jay Milani',company:'HB Mechanical Services',title:'Strategic Account Manager',email:'jmilani@hbmechanical.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Direct mechanical contractor SAM; military background; 30+ yrs exp; Houston. Emailed 5/29.'},
+  {id:54,name:'Todd Clifton',company:'American Mechanical Services',title:'Senior Account Manager',email:'tclifton@amsofusa.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Direct mechanical contractor; senior account mgmt; 47 yrs exp; Katy TX. Emailed 5/29.'},
+  {id:55,name:'Joseph Lamar',company:'Polk Mechanical Company',title:'Account Manager / Business Development',email:'joseph.lamar@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Polk Mechanical is a mechanical contractor; direct background; 21 yrs exp; Houston. Emailed 5/29.'},
+  {id:56,name:'Robert Wallace',company:'Ferguson',title:'Outside Sales Account Manager',email:'robert.wallace@ferguson.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Ferguson — top plumbing/HVAC distributor; outside sales; 23 yrs exp; Houston. Emailed 5/29.'},
+  {id:57,name:'Jason Gibson',company:'Comfort Systems USA',title:'Project Manager',email:'jason_gibson@msn.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Comfort Systems is major HVAC contractor; deep market knowledge; 30 yrs exp; Humble TX. Emailed 5/29.'},
+  {id:58,name:'Garrett Mock',company:'Hajoca Corporation',title:'Outside Sales / Account Manager',email:'gmock229@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Hajoca — major plumbing distributor; outside sales; 21 yrs exp; UH grad. Emailed 5/29.'},
+  {id:59,name:'Brian Reichenbach',company:'Desotec',title:'Sales Engineer',email:'brianreichenbach1@gmail.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Sales engineering; MBA; 27 yrs exp; Houston. Emailed 5/29.'},
+  {id:60,name:'Amy Port',company:'CS Mechanical CO',title:'Account Director',email:'amyp@csmechanical.co',phone:'',source:'Juicebox',status:'Emailed',notes:'Direct mechanical contractor; Account Director; Cypress TX. Emailed 5/29.'},
+  {id:61,name:'Paul Babcock',company:'Thermco',title:'Sales Engineer',email:'pkb55@msn.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Thermco HVAC rep firm; 45 yrs exp; 20+ yrs same company; Houston. Emailed 5/29.'},
+  {id:62,name:'John Thibert',company:'NDH Service',title:'Account Manager',email:'john_thibert@yahoo.com',phone:'',source:'Juicebox',status:'Emailed',notes:'Service account mgmt; 19 yrs exp; Houston. Emailed 5/29.'}
+];
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+const LS_KEY = 'dsi_hiring_v1';
+function load() {
+  try {
+    const d = localStorage.getItem(LS_KEY);
+    if (d) {
+      const parsed = JSON.parse(d);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e){ console.warn('load error:', e); }
+  const seeded = SEED.map(c => ({...c, lastUpdated: '2026-05-20'}));
+  save(seeded);
+  return seeded;
+}
+function save(arr) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); } catch(e){ console.warn('save error:', e); }
+}
+function nextId(candidates) {
+  return candidates.length ? Math.max(...candidates.map(c=>c.id)) + 1 : 1;
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let candidates = load() || SEED.map(c => ({...c, lastUpdated: '2026-05-20'}));
+let currentFilter = 'All';
+let searchQuery = '';
+let editingId = null;
+
+// ── VIEWS ────────────────────────────────────────────────────────────────────
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'candidates') renderCandidates();
+  if (name === 'add') populateAddForm();
+  if (name === 'write') initWriteView();
+  window.scrollTo(0,0);
+}
+
+// ── HOME ─────────────────────────────────────────────────────────────────────
+function renderHome() {
+  try {
+  const all = Array.isArray(candidates) ? candidates : [];
+  document.getElementById('home-sub').textContent = `Commercial Sales Rep Search · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  const total = all.length;
+  const emailed = all.filter(c => ['Emailed','Replied','Phone Screen','Interview Scheduled','Interviewed','Offer Extended','Hired','Offer Declined'].includes(c.status)).length;
+  const active = all.filter(c => ['Replied','Phone Screen','Interview Scheduled','Interviewed'].includes(c.status)).length;
+  const pending = all.filter(c => c.status === 'Pending Outreach').length;
+  const inbound = all.filter(c => c.status === 'Inbound — Pending Decision').length;
+  const dead = all.filter(c => ['Bounced / Dead Email','Not Pursuing','Offer Declined'].includes(c.status)).length;
+  const hired = all.filter(c => c.status === 'Hired').length;
+
+  document.getElementById('home-sub').textContent = `Commercial Sales Rep Search · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="sv" style="color:var(--blue)">${total}</div><div class="sl">Pipeline</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--green)">${emailed}</div><div class="sl">Outreached</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--yellow)">${pending}</div><div class="sl">Pending</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--teal)">${active}</div><div class="sl">Active</div></div>
+    <div class="stat-card"><div class="sv" style="color:var(--purple)">${inbound}</div><div class="sl">Inbound</div></div>
+    <div class="stat-card"><div class="sv" style="color:${hired>0?'var(--green)':'var(--dim)'}">${hired}</div><div class="sl">Hired</div></div>
+  `;
+
+  const pipeStages = [
+    {label:'Identified', count: total, color:'var(--blue)'},
+    {label:'Outreached', count: emailed, color:'var(--green)'},
+    {label:'Replied', count: all.filter(c=>['Replied','Phone Screen','Interview Scheduled','Interviewed','Offer Extended','Hired'].includes(c.status)).length, color:'var(--teal)'},
+    {label:'Interview', count: all.filter(c=>['Interview Scheduled','Interviewed'].includes(c.status)).length, color:'var(--yellow)'},
+    {label:'Offer', count: all.filter(c=>['Offer Extended','Offer Declined','Hired'].includes(c.status)).length, color:'var(--orange)'},
+    {label:'Hired', count: hired, color:'var(--green)'},
+  ];
+  document.getElementById('pipeline').innerHTML = pipeStages.map(s => `
+    <div class="pipe-card">
+      <div class="pn" style="color:${s.color}">${s.count}</div>
+      <div class="pl">${s.label}</div>
+    </div>
+  `).join('');
+
+  const inboundCands = all.filter(c => c.status === 'Inbound — Pending Decision');
+  const actionHTML = inboundCands.length ? inboundCands.map(c => `
+    <div class="action-card" onclick="openModal(${c.id})">
+      <div class="at">⚡ Action Needed — ${c.name}</div>
+      <div class="ab">${c.notes.substring(0,120)}…</div>
+    </div>
+  `).join('') : '';
+  document.getElementById('action-area').innerHTML = actionHTML;
+  } catch(e) { console.error('renderHome error:', e); document.getElementById('home-sub').textContent = 'DSI Hiring — tap Candidates to view pipeline'; }
+}
+
+// ── CANDIDATES ───────────────────────────────────────────────────────────────
+function renderCandidates() {
+  const pills = document.getElementById('filter-pills');
+  pills.innerHTML = FILTERS.map(f => `
+    <button class="pill${currentFilter===f?' active':''}" onclick="setFilter('${f}')">${f}</button>
+  `).join('');
+
+  const q = searchQuery.toLowerCase();
+  let filtered = candidates.filter(c => {
+    const matchesFilter = currentFilter === 'All' || c.status === currentFilter;
+    const matchesSearch = !q || c.name.toLowerCase().includes(q) ||
+      c.company.toLowerCase().includes(q) || c.notes.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) || c.title.toLowerCase().includes(q);
+    return matchesFilter && matchesSearch;
+  });
+
+  document.getElementById('cand-count').textContent = filtered.length;
+
+  if (!filtered.length) {
+    document.getElementById('cand-list').innerHTML = `
+      <div class="empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div style="font-size:14px;color:var(--muted)">No candidates found</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('cand-list').innerHTML = filtered.map(c => `
+    <div class="cand-card${c.status==='Inbound — Pending Decision'?' highlight':''}" onclick="openModal(${c.id})">
+      <div class="cand-top">
+        <div>
+          <div class="cand-name">${c.name}</div>
+          <div class="cand-company">${c.company}${c.title && c.title!=='TBD' ? ' · '+c.title : ''}</div>
+        </div>
+        <span class="badge ${STATUS_CLASS[c.status]||'b-pending'}">${c.status}</span>
+      </div>
+      ${c.notes ? `<div class="cand-notes">${c.notes}</div>` : ''}
+      <div class="cand-bottom">
+        <span style="font-size:11px;color:var(--dim)">${c.source}</span>
+        ${c.email && c.email!=='TBD' && !c.email.startsWith('TBD') ? `<span style="font-size:11px;color:var(--dim)">${c.email}</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  renderCandidates();
+}
+
+document.getElementById('search-input').addEventListener('input', function() {
+  searchQuery = this.value;
+  renderCandidates();
+});
+
+// ── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  editingId = id;
+  const c = candidates.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('modal-title').textContent = c.name;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field"><label>Name</label><input id="m-name" type="text" value="${esc(c.name)}"></div>
+    <div class="field"><label>Company</label><input id="m-company" type="text" value="${esc(c.company)}"></div>
+    <div class="field"><label>Title</label><input id="m-title" type="text" value="${esc(c.title)}"></div>
+    <div class="field"><label>Email</label><input id="m-email" type="text" value="${esc(c.email)}"></div>
+    <div class="field"><label>Phone</label><input id="m-phone" type="tel" value="${esc(c.phone||'')}"></div>
+    <div class="field"><label>Source</label>
+      <select id="m-source">
+        ${['Juicebox','LinkedIn','Skeet Referral','Craft Services','Direct Apply','Other'].map(s=>`<option${c.source===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="m-status">
+        ${STATUSES.map(s=>`<option${c.status===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="m-notes">${esc(c.notes||'')}</textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="deleteCandidate(${id})">Delete</button>
+      <button class="btn btn-primary" onclick="saveModal()">Save</button>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingId = null;
+}
+
+document.querySelector('.modal').addEventListener('click', e => e.stopPropagation());
+
+function saveModal() {
+  const idx = candidates.findIndex(x => x.id === editingId);
+  if (idx === -1) return;
+  candidates[idx] = {
+    ...candidates[idx],
+    name: document.getElementById('m-name').value.trim(),
+    company: document.getElementById('m-company').value.trim(),
+    title: document.getElementById('m-title').value.trim(),
+    email: document.getElementById('m-email').value.trim(),
+    phone: document.getElementById('m-phone').value.trim(),
+    source: document.getElementById('m-source').value,
+    status: document.getElementById('m-status').value,
+    notes: document.getElementById('m-notes').value.trim(),
+    lastUpdated: new Date().toISOString().split('T')[0]
+  };
+  save(candidates);
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingId = null;
+  renderCandidates();
+  renderHome();
+}
+
+function deleteCandidate(id) {
+  if (!confirm('Delete this candidate?')) return;
+  candidates = candidates.filter(c => c.id !== id);
+  save(candidates);
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingId = null;
+  renderCandidates();
+  renderHome();
+}
+
+// ── ADD FORM ─────────────────────────────────────────────────────────────────
+function populateAddForm() {
+  const sel = document.getElementById('add-status');
+  if (!sel.children.length) {
+    STATUSES.forEach(s => { const o = document.createElement('option'); o.textContent = s; sel.appendChild(o); });
+    sel.value = 'Pending Outreach';
+  }
+}
+
+function clearAddForm() {
+  ['add-name','add-company','add-title','add-email','add-phone','add-notes'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('add-source').value = 'Juicebox';
+  document.getElementById('add-status').value = 'Pending Outreach';
+}
+
+function saveNewCandidate() {
+  const name = document.getElementById('add-name').value.trim();
+  if (!name) { alert('Name is required.'); return; }
+  const c = {
+    id: nextId(candidates),
+    name,
+    company: document.getElementById('add-company').value.trim() || 'TBD',
+    title: document.getElementById('add-title').value.trim() || 'TBD',
+    email: document.getElementById('add-email').value.trim() || 'TBD',
+    phone: document.getElementById('add-phone').value.trim(),
+    source: document.getElementById('add-source').value,
+    status: document.getElementById('add-status').value,
+    notes: document.getElementById('add-notes').value.trim(),
+    lastUpdated: new Date().toISOString().split('T')[0]
+  };
+  candidates.unshift(c);
+  save(candidates);
+  clearAddForm();
+  showView('candidates');
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── WRITE TAB ────────────────────────────────────────────────────────────────
+const W_LS_KEY = 'dsi_humanizer_key';
+let w_channel = '';
+let w_hasKey = false;
+
+function initWriteView() {
+  // Auto-seed key so no manual setup needed
+  // API key must be entered manually in settings
+  w_hasKey = !!(localStorage.getItem(W_LS_KEY) || '').trim();
+  const badge = document.getElementById('w-key-badge');
+  if (badge) {
+    badge.textContent = w_hasKey ? 'API Key Set ✓' : 'No API Key';
+    badge.className = 'badge ' + (w_hasKey ? 'b-emailed' : 'b-nopursue');
+  }
+  wUpdateBtn();
+}
+
+function wWordCount(s) { return s.trim() ? s.trim().split(/\s+/).length : 0; }
+
+function wOnInput() {
+  const v = document.getElementById('w-input').value;
+  document.getElementById('w-wc-in').textContent = wWordCount(v) + ' words';
+  wUpdateBtn();
+}
+
+function wUpdateBtn() {
+  const hasText = (document.getElementById('w-input')?.value || '').trim().length > 0;
+  const btn = document.getElementById('w-rewrite-btn');
+  if (btn) btn.disabled = !(hasText && w_hasKey);
+}
+
+// Channel selection
+document.addEventListener('click', e => {
+  const pill = e.target.closest('.w-ch-pill');
+  if (!pill) return;
+  document.querySelectorAll('.w-ch-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+  w_channel = pill.dataset.wch;
+});
+
+const W_TELLS = [
+  { word:'delve', level:'high' }, { word:'leverage', level:'high' },
+  { word:'landscape', level:'high' }, { word:"it's important to note", level:'high' },
+  { word:'it is important to note', level:'high' }, { word:'in conclusion', level:'high' },
+  { word:'game-changing', level:'high' }, { word:'in the ever-evolving', level:'high' },
+  { word:'in the realm of', level:'high' }, { word:'synergy', level:'high' },
+  { word:'synergies', level:'high' }, { word:'actionable insights', level:'high' },
+  { word:'revolutionary', level:'med' }, { word:'transformative', level:'med' },
+  { word:"it's worth noting", level:'med' }, { word:"in today's", level:'med' },
+  { word:'ever-changing', level:'med' }, { word:'cutting-edge', level:'med' },
+  { word:'state-of-the-art', level:'med' }, { word:'seamlessly', level:'med' },
+  { word:'robust', level:'med' }, { word:'utilize', level:'med' },
+  { word:'furthermore', level:'med' }, { word:'moreover', level:'med' },
+  { word:'holistic', level:'med' }, { word:'stakeholders', level:'med' },
+  { word:'empower', level:'low' }, { word:'paradigm', level:'low' },
+  { word:'comprehensive', level:'low' }, { word:'innovative', level:'low' },
+];
+
+function wDetectTells(text) {
+  const lower = text.toLowerCase();
+  return W_TELLS.map(t => {
+    const re = new RegExp('\\b' + t.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + '\\b','gi');
+    const m = lower.match(re);
+    return m ? { ...t, count: m.length } : null;
+  }).filter(Boolean).sort((a,b) => ({ high:0, med:1, low:2 }[a.level] - { high:0, med:1, low:2 }[b.level]));
+}
+
+function wRunDetect() {
+  const text = document.getElementById('w-input').value;
+  if (!text.trim()) return;
+  const tells = wDetectTells(text);
+  const score = Math.min(100, tells.reduce((s,t) => s + (t.level==='high'?25:t.level==='med'?12:6)*t.count, 0));
+  const color = score >= 60 ? 'var(--red)' : score >= 30 ? 'var(--yellow)' : 'var(--green)';
+  document.getElementById('w-score-num').textContent = score + '%';
+  document.getElementById('w-score-num').style.color = color;
+  document.getElementById('w-score-fill').style.cssText = `width:${score}%;background:${color}`;
+  document.getElementById('w-score-desc').textContent = score >= 60 ? 'Looks AI-generated' : score >= 30 ? 'Some AI patterns detected' : 'Mostly human-sounding';
+  document.getElementById('w-tells-list').innerHTML = tells.length
+    ? tells.map(t => `<div class="w-tell-row"><span style="font-size:14px;font-weight:600;">“${t.word}”</span><span class="w-tbadge wt-${t.level}">${t.count}x · ${t.level}</span></div>`).join('')
+    : '<div style="color:var(--green);font-size:14px;text-align:center;padding:10px 0;">No major AI tells detected ✓</div>';
+  document.getElementById('w-detect-card').style.display = '';
+  document.getElementById('w-detect-card').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+const W_CH_NOTES = {
+  email:    'Format as an email: brief, clear, action-oriented, warm but efficient.',
+  linkedin: 'Format for LinkedIn: professional but conversational, authoritative without being stiff.',
+  twitter:  'Format for Twitter/X: punchy, direct, zero filler. Under 280 chars if possible.',
+  sms:      'Format as a text message: short, casual, conversational. No formal language.',
+  script:   'Format as a video script: spoken-word rhythm. Write how someone actually talks out loud.',
+  '': '',
+};
+
+async function wRunRewrite() {
+  const text = document.getElementById('w-input').value.trim();
+  if (!text) return;
+  const key = localStorage.getItem(W_LS_KEY);
+  if (!key) { showWriteKeyModal(); return; }
+
+  const btn = document.getElementById('w-rewrite-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="w-spinner"></span> Rewriting…';
+  wRunDetect();
+
+  const tells = wDetectTells(text);
+  const chNote = W_CH_NOTES[w_channel] || '';
+  const system = `You are an expert editor who rewrites AI-generated text to sound like a real person wrote it.
+
+Rules:
+- Replace AI buzzwords with plain, specific language
+- Vary sentence length — mix short punchy lines with longer ones
+- Use contractions naturally (don't, it's, you're)
+- Remove throat-clearing and filler phrases
+- Keep the core message intact — change HOW it's said, not WHAT
+- Write with a clear point of view and personality
+- Never use: delve, leverage, landscape, transformative, game-changing, synergy, seamlessly, comprehensive, robust, utilize, paradigm, actionable insights, in today's fast-paced, it's important to note, in conclusion, furthermore, moreover, holistic, stakeholders${chNote ? '\n\nChannel: ' + chNote : ''}
+
+Return ONLY the rewritten text. No intro, no commentary.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        system,
+        messages: [{ role:'user', content: 'AI tells: ' + (tells.map(t=>'"'+t.word+'"').join(', ')||'none') + '\n\nRewrite:\n\n' + text }]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message || 'Request failed');
+    const out = data.content[0].text.trim();
+    document.getElementById('w-output-text').value = out;
+    document.getElementById('w-output-text').style.height = 'auto';
+    document.getElementById('w-output-text').style.height = document.getElementById('w-output-text').scrollHeight + 'px';
+    document.getElementById('w-wc-out').textContent = wWordCount(out) + ' words';
+    document.getElementById('w-output-card').style.display = '';
+    document.getElementById('w-output-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  } catch(err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Rewrite';
+    wUpdateBtn();
+  }
+}
+
+function wCopyOutput(btn) {
+  const ta = document.getElementById('w-output-text');
+  if (!ta.value) return;
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, 99999);
+  try {
+    document.execCommand('copy');
+    const orig = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => btn.textContent = orig, 1800);
+  } catch(e) {
+    // fallback: just leave selected so user can copy manually
+  }
+}
+
+function showWriteKeyModal() {
+  document.getElementById('w-key-input').value = localStorage.getItem(W_LS_KEY) || '';
+  document.getElementById('w-key-modal').classList.add('open');
+  setTimeout(() => document.getElementById('w-key-input').focus(), 100);
+}
+
+function closeWriteKeyModal(e) {
+  if (e && e.target !== document.getElementById('w-key-modal')) return;
+  document.getElementById('w-key-modal').classList.remove('open');
+}
+
+function wSaveKey() {
+  const k = document.getElementById('w-key-input').value.trim();
+  if (!k) return;
+  localStorage.setItem(W_LS_KEY, k);
+  w_hasKey = true;
+  closeWriteKeyModal();
+  initWriteView();
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+if (localStorage.getItem(AUTH_KEY) === '1') {
+  showApp();
+} else {
+  showLoginScreen();
+  setTimeout(() => { try { document.getElementById('pw-input').focus(); } catch(e){} }, 100);
+}
+</script>
+</body>
+</html>

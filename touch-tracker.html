@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSI Recruiting — Touch Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; }
+  header { background: #1a1f2e; border-bottom: 2px solid #c05621; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  header h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  header h1 span { color: #f6ad55; }
+  .subtitle { font-size: 12px; color: #718096; }
+  .stats { display: flex; gap: 12px; margin: 18px 24px; flex-wrap: wrap; }
+  .stat { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 110px; }
+  .stat .num { font-size: 26px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: .5px; }
+  .num-red { color: #fc8181; }
+  .num-yellow { color: #f6ad55; }
+  .num-green { color: #68d391; }
+  .num-blue { color: #63b3ed; }
+  .num-purple { color: #b794f4; }
+  .controls { padding: 0 24px 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .controls input, .controls select { background: #1a1f2e; border: 1px solid #2d3748; color: #e2e8f0; border-radius: 6px; padding: 7px 12px; font-size: 13px; }
+  .controls input { width: 220px; }
+  table { width: calc(100% - 48px); margin: 0 24px 40px; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #1a1f2e; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: #718096; border-bottom: 1px solid #2d3748; white-space: nowrap; cursor: pointer; }
+  thead th:hover { color: #e2e8f0; }
+  tbody tr { border-bottom: 1px solid #1a2035; transition: background .1s; cursor: pointer; }
+  tbody tr:hover { background: #1a1f2e; }
+  td { padding: 9px 12px; vertical-align: top; }
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+  .b-new       { background: #2d3748; color: #a0aec0; }
+  .b-emailed   { background: #1a365d; color: #63b3ed; }
+  .b-replied   { background: #1c4532; color: #68d391; }
+  .b-interview { background: #44337a; color: #b794f4; }
+  .b-offer     { background: #744210; color: #f6ad55; }
+  .b-dead      { background: #742a2a; color: #fc8181; }
+  .b-hold      { background: #3d2b1e; color: #ed8936; }
+  .urgency { display: inline-block; width: 8px; height: 8px; border-radius: 50%; }
+  .urg-red    { background: #fc8181; box-shadow: 0 0 6px #fc8181; }
+  .urg-yellow { background: #f6ad55; box-shadow: 0 0 6px #f6ad55; }
+  .urg-green  { background: #68d391; }
+  .urg-grey   { background: #4a5568; }
+  .days-col { font-weight: 600; white-space: nowrap; }
+  .days-hot { color: #fc8181; }
+  .days-warm { color: #f6ad55; }
+  .days-ok { color: #68d391; }
+  .days-new { color: #718096; }
+  .touch-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+  .dot { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+  .dot-sent { background: #1a365d; color: #63b3ed; border: 1px solid #2b6cb0; }
+  .dot-reply { background: #1c4532; color: #68d391; border: 1px solid #276749; }
+  .dot-empty { background: #1a1f2e; border: 1px dashed #2d3748; }
+  .name-cell { font-weight: 600; color: #fff; }
+  .company-cell { font-size: 11px; color: #718096; }
+  /* Modal */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #1a1f2e; border: 1px solid #2d3748; border-radius: 14px; width: 540px; max-width: 96vw; max-height: 90vh; overflow-y: auto; padding: 24px; }
+  .modal h2 { font-size: 17px; color: #fff; }
+  .modal .m-meta { font-size: 12px; color: #718096; margin: 4px 0 18px; }
+  .modal label { font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: .5px; display: block; margin-top: 14px; margin-bottom: 4px; }
+  .modal input, .modal select, .modal textarea { width: 100%; background: #0f1117; border: 1px solid #2d3748; color: #e2e8f0; border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+  .modal textarea { height: 70px; resize: vertical; }
+  .modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .btn { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: #c05621; color: #fff; }
+  .btn-primary:hover { background: #dd6b20; }
+  .btn-ghost { background: #2d3748; color: #a0aec0; }
+  .touch-history { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+  .touch-item { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 10px 12px; font-size: 12px; }
+  .touch-item .t-date { font-weight: 600; color: #63b3ed; }
+  .touch-item .t-method { color: #718096; margin-left: 8px; }
+  .touch-item .t-note { color: #a0aec0; margin-top: 3px; }
+  .add-touch-form { background: #0f1117; border: 1px solid #2d3748; border-radius: 8px; padding: 14px; margin-top: 10px; }
+  .add-touch-form h4 { font-size: 12px; color: #718096; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
+  .touch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .touch-row input, .touch-row select { flex: 1; min-width: 120px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>DSI Recruiting — <span>Touch Tracker</span></h1>
+    <div class="subtitle">Live candidate follow-up status · Houston Commercial Sales Rep</div>
+  </div>
+  <div style="font-size:12px;color:#718096;" id="last-updated"></div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="num num-blue" id="st-total">0</div><div class="lbl">Total Candidates</div></div>
+  <div class="stat"><div class="num num-red" id="st-overdue">0</div><div class="lbl">Overdue (14d+)</div></div>
+  <div class="stat"><div class="num num-yellow" id="st-due">0</div><div class="lbl">Due Soon (7–13d)</div></div>
+  <div class="stat"><div class="num num-green" id="st-replied">0</div><div class="lbl">Replied / Active</div></div>
+  <div class="stat"><div class="num num-purple" id="st-interview">0</div><div class="lbl">Interview Stage</div></div>
+  <div class="stat"><div class="num" style="color:#4a5568" id="st-dead">0</div><div class="lbl">Closed Out</div></div>
+</div>
+
+<div class="controls">
+  <input type="text" id="search" placeholder="Search candidates..." oninput="render()">
+  <select id="status-filter" onchange="render()">
+    <option value="">All Statuses</option>
+    <option value="new">Not Yet Contacted</option>
+    <option value="emailed">Emailed</option>
+    <option value="replied">Replied</option>
+    <option value="interview">Interview</option>
+    <option value="offer">Offer Extended</option>
+    <option value="hold">On Hold</option>
+    <option value="dead">Closed Out</option>
+  </select>
+  <select id="urgency-filter" onchange="render()">
+    <option value="">All Urgency</option>
+    <option value="overdue">🔴 Overdue</option>
+    <option value="due">🟡 Due Soon</option>
+    <option value="ok">🟢 OK</option>
+  </select>
+  <select id="sort-by" onchange="render()">
+    <option value="urgency">Sort: Most Urgent</option>
+    <option value="name">Sort: Name</option>
+    <option value="added">Sort: Recently Added</option>
+  </select>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>#</th>
+      <th>Name</th>
+      <th>Company / Title</th>
+      <th>Status</th>
+      <th>Touches</th>
+      <th>Last Contact</th>
+      <th>Next Action</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2 id="modal-name"></h2>
+    <div class="m-meta" id="modal-meta"></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModalDirect()">Close</button>
+      <button class="btn btn-primary" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STATUS_META = {
+  new:       { label: 'Not Yet Contacted', cls: 'b-new' },
+  emailed:   { label: 'Emailed',           cls: 'b-emailed' },
+  replied:   { label: 'Replied',           cls: 'b-replied' },
+  interview: { label: 'Interview',         cls: 'b-interview' },
+  offer:     { label: 'Offer Extended',    cls: 'b-offer' },
+  hold:      { label: 'On Hold',           cls: 'b-hold' },
+  dead:      { label: 'Closed Out',        cls: 'b-dead' },
+};
+
+const BASE = [
+  {id:1,  num:1,  name:'David Earl',         company:'Majestic Air',              title:'TBD',                          email:'',                                 status:'new',       notes:'Residential — verify commercial', added:'2026-04-30'},
+  {id:2,  num:4,  name:'Jeremy Londenberg',  company:'RDI Mechanical',            title:'Sales Exec / BD Mgr',          email:'jeremylondenberg@outlook.com',     status:'emailed',   notes:'13 yrs sales/BD experience', added:'2026-04-30'},
+  {id:3,  num:6,  name:'John Moore',         company:'Raven Mechanical LP',       title:'Estimator',                    email:'john.moore@ravenmechanical.com',   status:'emailed',   notes:'Estimator title — worth a shot', added:'2026-04-30'},
+  {id:4,  num:8,  name:'Adam Kuskos',        company:'HTS Engineering',           title:'Systems Sales Engineer',       email:'akuskos@yahoo.com',                status:'emailed',   notes:'MEP/mechanical/HVAC technical sales', added:'2026-04-30'},
+  {id:5,  num:9,  name:'Gabriel Ordonez',    company:'APS Building Services',     title:'Account Manager',              email:'jesusboost@gmail.com',             status:'emailed',   notes:'Also at ABM Industries; Houston', added:'2026-04-30'},
+  {id:6,  num:11, name:'Jasen Mummert',      company:'Engineering Excellence',    title:'Commercial Account Manager',   email:'wjmummert@gmail.com',              status:'emailed',   notes:'Consultative sales; territory planning', added:'2026-04-30'},
+  {id:7,  num:12, name:'John Hinkle',        company:'Letsos Company',            title:'Service Account Manager',      email:'hinklejt86@gmail.com',             status:'emailed',   notes:'Also BD at Charlie\'s Plumbing', added:'2026-04-30'},
+  {id:8,  num:13, name:'Jonathan Da Silva',  company:'Hayden Industrial Products','title':'Strategic Account Manager',  email:'jdasilva0613@gmail.com',           status:'emailed',   notes:'Engineered heat rejection; data center/industrial', added:'2026-04-30'},
+  {id:9,  num:14, name:'Maurice Mullins',    company:'Way Service',               title:'Project Sales Rep',            email:'mmhts@hotmail.com',                status:'emailed',   notes:'Chiller/VRF/RTU trained; former Comfort Systems svc mgr', added:'2026-04-30'},
+  {id:10, num:15, name:'Miguel Mateo',       company:'Har-Con Mechanical',        title:'HVAC Account Exec / PM',       email:'miguelcmateo@gmail.com',           status:'emailed',   notes:'10+ yrs HVAC; prev Johnson Controls', added:'2026-04-30'},
+  {id:11, num:16, name:'Nathan Sheen',       company:'Hudson Technologies',       title:'Technical Sales Acct Mgr',     email:'nsheen@att.net',                   status:'emailed',   notes:'Prev Daikin Applied; HVAC controls + outside sales', added:'2026-04-30'},
+  {id:12, num:17, name:'Ross Kiatta',        company:'Sunbelt Rentals',           title:'Power & HVAC Sales Rep',       email:'ross.kiatta@sunbeltrentals.com',   status:'interview', notes:'INTERVIEW REQUESTED — Tuesday 2026-06-03. Outside sales; HVAC rental/service.', added:'2026-04-30'},
+  {id:13, num:18, name:'Shannon Jeter',      company:'HCL Mechanical Services',   title:'Service Account Manager',      email:'shannonj@hclmechanicalservices.com', status:'emailed', notes:'Prev Trane, TD Industries, Carrier, Brandt', added:'2026-05-05'},
+  {id:14, num:19, name:'Tim Moreland',       company:'DAC, Inc.',                 title:'Service Account Manager',      email:'tim-moreland@att.net',             status:'dead',      notes:'Not interested — declined via LinkedIn 2026-05-28', added:'2026-04-30'},
+  {id:15, num:20, name:'Trey Anderson',      company:'Unify Energy Solutions',    title:'Sales Service Executive',      email:'waterfowlhunts@yahoo.com',         status:'emailed',   notes:'HVAC/plumbing/electrical service sales; 832-882-6684', added:'2026-04-30'},
+  {id:16, num:21, name:'Tyler Vest',         company:'DAC, Inc.',                 title:'Account Manager / HVAC Svcs', email:'tylerthevest510@yahoo.com',         status:'emailed',   notes:'Customer-first; HVAC distribution + oil & gas background. No reply yet — Round 3 push needed via LinkedIn.', added:'2026-04-30'},
+  {id:17, num:22, name:'Ryan Dunkleberger', company:'Herc Rentals',              title:'Strategic Account Manager',    email:'ryandunkin@yahoo.com',             status:'emailed',   notes:'Equipment rental background', added:'2026-05-05'},
+  {id:18, num:23, name:'James Knight',       company:'Sunbelt Rentals Inc.',      title:'Strategic Account Manager',    email:'jamesknight.spring@outlook.com',   status:'emailed',   notes:'Equipment rental; Cypress TX', added:'2026-05-05'},
+  {id:19, num:24, name:'Aaron Dunning',      company:'Way Engineering LTD.',      title:'Account Manager',              email:'wisewordz86@yahoo.com',            status:'emailed',   notes:'Mechanical/engineering background; strong fit', added:'2026-05-05'},
+  {id:20, num:25, name:'Avery Neubert',      company:'United Rentals',            title:'Strategic Account Manager',    email:'neubert.avery@gmail.com',          status:'emailed',   notes:'Equipment rental background', added:'2026-05-05'},
+  {id:21, num:26, name:'Brandon Blum',       company:'Herc Rentals',              title:'Strategic Account Manager',    email:'bblum1998@gmail.com',              status:'emailed',   notes:'Equipment rental background', added:'2026-05-05'},
+  {id:22, num:27, name:'Jeremy Brewer',      company:'Rheem Manufacturing',       title:'Regional Commercial A/C Sales Engineer', email:'jfbrew50@gmail.com',   status:'emailed',   notes:'Strong fit — commercial HVAC manufacturer rep', added:'2026-05-05'},
+  {id:23, num:29, name:'Clay Condrey',       company:'HTS Engineering',           title:'System Sales Engineer & Team Leader', email:'claycondrey@gmail.com',  status:'emailed',   notes:'Strong fit — HVAC systems sales + team lead', added:'2026-05-05'},
+  {id:24, num:30, name:'Roger Vasquez',      company:'HTS Engineering',           title:'Commercial Real Estate Acct Mgr', email:'rogervasquez@verizon.net',    status:'emailed',   notes:'Strong fit — commercial RE + HVAC engineering', added:'2026-05-05'},
+  {id:25, num:31, name:'Devin Crow',         company:'HTS Engineering',           title:'System Sales Engineer',        email:'devincrow@live.com',               status:'emailed',   notes:'Strong fit — HVAC systems technical sales', added:'2026-05-05'},
+  {id:26, num:33, name:'Ben Rogers',         company:'DXP Enterprises Inc.',      title:'Account Manager – TX Gulf Coast', email:'brogers114@gmail.com',         status:'emailed',   notes:'Industrial distribution/services; Gulf Coast territory', added:'2026-05-11'},
+  {id:27, num:34, name:'Kern Tucker',        company:'Hunton Trane',              title:'Operations Management Leader', email:'kerntt@gmail.com',                 status:'emailed',   notes:'Hunton is major Trane distributor in TX', added:'2026-05-11'},
+  {id:28, num:35, name:'Rachel Haines',      company:'S&S HVAC Equipment',        title:'Sales Engineer',               email:'rachel.l.downey@gmail.com',        status:'emailed',   notes:'HVAC equipment sales engineering; Houston', added:'2026-05-11'},
+  {id:29, num:36, name:'Mark Bell',          company:'Hansa-Flex USA',            title:'Sales & Business Unit Manager',email:'mark.bell2.0@gmail.com',           status:'emailed',   notes:'Industrial/hydraulic — verify HVAC crossover', added:'2026-05-11'},
+  {id:30, num:37, name:'Dustin Schultz',     company:'CS&P Technologies LP',      title:'Sales Application Engineer',   email:'dschultz317@hotmail.com',          status:'emailed',   notes:'Industrial/process engineering sales; Houston', added:'2026-05-11'},
+  {id:31, num:38, name:'Charnee Francis',    company:"Derryberry's Mechanical",   title:'Service Account Manager',      email:'frances_cf@yahoo.com',             status:'emailed',   notes:'Strong fit — direct mechanical contractor; Houston', added:'2026-05-11'},
+  {id:32, num:39, name:'Tyler Bush',         company:'APS Building Services',     title:'Account Manager',              email:'tyler.bush92@icloud.com',          status:'emailed',   notes:'Building services account mgmt; Houston', added:'2026-05-11'},
+  {id:33, num:40, name:'Rene Yzaguirre',     company:'Carrier',                   title:'Executive Account Manager',    email:'reneisaguirre@hotmail.com',        status:'emailed',   notes:'Strong fit — Carrier HVAC executive account mgmt', added:'2026-05-11'},
+  {id:34, num:43, name:'David Curtis',       company:'Sunbelt Rentals Inc.',      title:'Territory Account Manager',    email:'dacurtis777@gmail.com',            status:'emailed',   notes:'Territory account mgmt; equipment rental; Houston', added:'2026-05-11'},
+  {id:35, num:44, name:'Russell Johnson',    company:'Honeywell',                 title:'Application / System Sales Engineer', email:'russellalanjohnson91@gmail.com', status:'emailed', notes:'Strong fit — Honeywell systems/application sales engineering', added:'2026-05-11'},
+  {id:36, num:45, name:'Jacob McLaney',      company:'Conco Services LLC',        title:'Senior Account Manager',       email:'jacobmclaney@gmail.com',           status:'emailed',   notes:'Senior acct mgmt; industrial tube cleaning/services', added:'2026-05-11'},
+  {id:37, num:46, name:'Andi Hall',          company:'Houk Air Conditioning',     title:'Commercial Account Manager – Houston Region', email:'andi.b.hall@outlook.com', status:'emailed', notes:'Strong fit — commercial HVAC acct mgmt; Crosby TX', added:'2026-05-11'},
+  {id:38, num:51, name:'Garrett Dorram',     company:'TBD',                       title:'TBD',                          email:'garrett.dorram7@gmail.com',        status:'dead',      notes:'Offer extended — declined 2026-05-18. Skeet referral.', added:'2026-05-13'},
+  {id:39, num:52, name:'Chris Munz',         company:'TBD',                       title:'Service Sales Executive',      email:'',                                 status:'dead',      notes:'❌ NOT CONSIDERED — not the right fit for the team. Via Craft Services (AJ Hollrah). Interviewed 2026-05-27. Do not re-engage.', added:'2026-05-27'},
+  {id:40, num:53, name:'Jay Milani',         company:'HB Mechanical Services',    title:'Strategic Account Manager',    email:'jmilani@hbmechanical.com',         status:'emailed',   notes:'Direct mechanical contractor SAM; military background; 30+ yrs exp', added:'2026-05-29'},
+  {id:41, num:54, name:'Todd Clifton',       company:'American Mechanical Services', title:'Senior Account Manager',    email:'tclifton@amsofusa.com',            status:'emailed',   notes:'Direct mechanical contractor; 47 yrs exp; Katy TX', added:'2026-05-29'},
+  {id:42, num:55, name:'Joseph Lamar',       company:'Polk Mechanical Company',   title:'Account Manager / BD',         email:'joseph.lamar@yahoo.com',           status:'emailed',   notes:'Direct mechanical contractor; 21 yrs exp; Houston', added:'2026-05-29'},
+  {id:43, num:56, name:'Robert Wallace',     company:'Ferguson',                  title:'Outside Sales Account Manager',email:'robert.wallace@ferguson.com',     status:'emailed',   notes:'Top plumbing/HVAC distributor; 23 yrs exp; Houston', added:'2026-05-29'},
+  {id:44, num:57, name:'Jason Gibson',       company:'Comfort Systems USA',       title:'Project Manager',              email:'jason_gibson@msn.com',             status:'emailed',   notes:'Major HVAC contractor; 30 yrs exp; Humble TX', added:'2026-05-29'},
+  {id:45, num:58, name:'Garrett Mock',       company:'Hajoca Corporation',        title:'Outside Sales / Account Manager', email:'gmock229@gmail.com',           status:'emailed',   notes:'Major plumbing distributor; 21 yrs exp; UH grad', added:'2026-05-29'},
+  {id:46, num:59, name:'Brian Reichenbach',  company:'Desotec',                   title:'Sales Engineer',               email:'brianreichenbach1@gmail.com',      status:'emailed',   notes:'Sales engineering; MBA; 27 yrs exp; Houston', added:'2026-05-29'},
+  {id:47, num:60, name:'Amy Port',           company:'CS Mechanical CO',          title:'Account Director',             email:'amyp@csmechanical.co',             status:'emailed',   notes:'Direct mechanical contractor; Account Director; Cypress TX', added:'2026-05-29'},
+  {id:48, num:61, name:'Paul Babcock',       company:'Thermco',                   title:'Sales Engineer',               email:'pkb55@msn.com',                    status:'emailed',   notes:'HVAC rep firm; 45 yrs exp; 20+ yrs same company', added:'2026-05-29'},
+  {id:49, num:62, name:'John Thibert',       company:'NDH Service',               title:'Account Manager',              email:'john_thibert@yahoo.com',           status:'emailed',   notes:'Service acct mgmt; 19 yrs exp; Houston', added:'2026-05-29'},
+];
+
+// Touch history stored separately
+let touches = JSON.parse(localStorage.getItem('dsi_touches') || '{}');
+let candidates = JSON.parse(localStorage.getItem('dsi_candidates') || 'null') || BASE;
+let editId = null;
+
+function save() {
+  localStorage.setItem('dsi_candidates', JSON.stringify(candidates));
+  localStorage.setItem('dsi_touches', JSON.stringify(touches));
+}
+
+function daysSince(dateStr) {
+  if (!dateStr) return null;
+  return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+}
+
+function getLastTouch(id) {
+  const th = touches[id];
+  if (!th || !th.length) return null;
+  return th[th.length - 1].date;
+}
+
+function urgencyOf(c) {
+  if (['dead','offer'].includes(c.status)) return 'grey';
+  if (c.status === 'new') return 'grey';
+  const lt = getLastTouch(c.id) || c.added;
+  const d = daysSince(lt);
+  if (d === null) return 'grey';
+  if (d >= 14) return 'red';
+  if (d >= 7)  return 'yellow';
+  return 'green';
+}
+
+function touchDots(id, status) {
+  const th = touches[id] || [];
+  const max = 5;
+  const dots = [];
+  for (let i = 0; i < max; i++) {
+    if (i < th.length) {
+      const t = th[i];
+      const cls = t.replied ? 'dot-reply' : 'dot-sent';
+      const lbl = t.replied ? 'R' : (i + 1);
+      dots.push(`<div class="dot ${cls}" title="${t.date}: ${t.method}">${lbl}</div>`);
+    } else {
+      dots.push(`<div class="dot dot-empty"></div>`);
+    }
+  }
+  return `<div class="touch-dots">${dots.join('')}</div>`;
+}
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const sf = document.getElementById('status-filter').value;
+  const uf = document.getElementById('urgency-filter').value;
+  const sort = document.getElementById('sort-by').value;
+
+  const urgMap = { red: 0, yellow: 1, green: 2, grey: 3 };
+
+  let list = candidates.filter(c =>
+    (!q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)) &&
+    (!sf || c.status === sf) &&
+    (!uf || (uf === 'overdue' && urgencyOf(c) === 'red') ||
+            (uf === 'due' && urgencyOf(c) === 'yellow') ||
+            (uf === 'ok' && urgencyOf(c) === 'green'))
+  );
+
+  if (sort === 'urgency') list.sort((a,b) => urgMap[urgencyOf(a)] - urgMap[urgencyOf(b)]);
+  else if (sort === 'name') list.sort((a,b) => a.name.localeCompare(b.name));
+  else list.sort((a,b) => (b.added || '').localeCompare(a.added || ''));
+
+  // Stats (from full list)
+  const all = candidates;
+  document.getElementById('st-total').textContent = all.filter(c => !['dead'].includes(c.status)).length;
+  document.getElementById('st-overdue').textContent = all.filter(c => urgencyOf(c) === 'red').length;
+  document.getElementById('st-due').textContent = all.filter(c => urgencyOf(c) === 'yellow').length;
+  document.getElementById('st-replied').textContent = all.filter(c => c.status === 'replied').length;
+  document.getElementById('st-interview').textContent = all.filter(c => c.status === 'interview').length;
+  document.getElementById('st-dead').textContent = all.filter(c => c.status === 'dead').length;
+
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleString();
+
+  const tbody = document.getElementById('tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#4a5568;padding:30px;">No candidates match filters</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(c => {
+    const urg = urgencyOf(c);
+    const sm = STATUS_META[c.status] || STATUS_META.new;
+    const lt = getLastTouch(c.id);
+    const d = lt ? daysSince(lt) : null;
+    let daysTxt = '', daysCls = 'days-new';
+    if (d !== null) {
+      daysTxt = d === 0 ? 'Today' : d + 'd ago';
+      daysCls = d >= 14 ? 'days-hot' : d >= 7 ? 'days-warm' : 'days-ok';
+    } else if (c.status === 'emailed') {
+      daysTxt = 'No date';
+      daysCls = 'days-hot';
+    }
+
+    const nextAction = c.status === 'interview' ? '📅 Interview scheduled' :
+                       c.status === 'replied'   ? '📞 Follow up now' :
+                       c.status === 'dead'      ? '—' :
+                       urg === 'red'            ? '⚡ Send follow-up' :
+                       urg === 'yellow'         ? '📧 Follow up soon' :
+                       c.status === 'new'       ? '📤 Send outreach' : '✅ Recent';
+
+    return `<tr onclick="openEdit(${c.id})">
+      <td><span class="urgency urg-${urg}"></span></td>
+      <td style="color:#4a5568;font-size:11px;">${c.num}</td>
+      <td><div class="name-cell">${c.name}</div><div class="company-cell">${c.email || '—'}</div></td>
+      <td><div class="name-cell" style="font-size:12px;">${c.company}</div><div class="company-cell">${c.title}</div></td>
+      <td><span class="badge ${sm.cls}">${sm.label}</span></td>
+      <td>${touchDots(c.id, c.status)}</td>
+      <td class="days-col ${daysCls}">${daysTxt}</td>
+      <td style="font-size:12px;color:#a0aec0;">${nextAction}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openEdit(id) {
+  editId = id;
+  const c = candidates.find(x => x.id === id);
+  if (!c) return;
+  const th = touches[id] || [];
+  document.getElementById('modal-name').textContent = c.name;
+  document.getElementById('modal-meta').textContent = `${c.company} · ${c.title} · ${c.email || 'No email on file'}`;
+
+  const statusOpts = Object.entries(STATUS_META).map(([k,v]) =>
+    `<option value="${k}" ${c.status===k?'selected':''}>${v.label}</option>`
+  ).join('');
+
+  const touchHistory = th.length ? th.map(t =>
+    `<div class="touch-item">
+      <span class="t-date">${t.date}</span>
+      <span class="t-method">${t.method}</span>
+      ${t.replied ? '<span class="badge b-replied" style="margin-left:6px;">Replied</span>' : ''}
+      ${t.note ? `<div class="t-note">${t.note}</div>` : ''}
+    </div>`
+  ).join('') : '<div style="color:#4a5568;font-size:12px;">No touches recorded yet.</div>';
+
+  document.getElementById('modal-body').innerHTML = `
+    <label>Status</label>
+    <select id="m-status">${statusOpts}</select>
+    <label>Notes</label>
+    <textarea id="m-notes">${c.notes || ''}</textarea>
+
+    <label style="margin-top:18px;">Touch History</label>
+    <div class="touch-history">${touchHistory}</div>
+
+    <div class="add-touch-form">
+      <h4>Log a Touch</h4>
+      <div class="touch-row">
+        <input type="date" id="t-date" value="${new Date().toISOString().slice(0,10)}">
+        <select id="t-method">
+          <option>Email</option><option>LinkedIn</option><option>Phone</option><option>Text</option><option>In Person</option>
+        </select>
+        <select id="t-replied">
+          <option value="0">No Reply</option>
+          <option value="1">Got a Reply</option>
+        </select>
+      </div>
+      <input id="t-note" placeholder="Note (optional)" style="width:100%;margin-top:8px;">
+      <button class="btn btn-primary" style="margin-top:10px;width:100%;" onclick="logTouch()">Log Touch</button>
+    </div>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+function logTouch() {
+  if (!editId) return;
+  const t = {
+    date:    document.getElementById('t-date').value,
+    method:  document.getElementById('t-method').value,
+    replied: document.getElementById('t-replied').value === '1',
+    note:    document.getElementById('t-note').value.trim(),
+  };
+  if (!touches[editId]) touches[editId] = [];
+  touches[editId].push(t);
+  // Update status if got a reply
+  if (t.replied) {
+    const idx = candidates.findIndex(x => x.id === editId);
+    if (candidates[idx].status === 'emailed') candidates[idx].status = 'replied';
+  }
+  save();
+  openEdit(editId); // refresh modal
+  render();
+}
+
+function saveModal() {
+  const idx = candidates.findIndex(x => x.id === editId);
+  candidates[idx].status = document.getElementById('m-status').value;
+  candidates[idx].notes = document.getElementById('m-notes').value;
+  save(); closeModalDirect(); render();
+}
+
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal').classList.remove('open'); editId = null; }
+
+render();
+setInterval(render, 60000); // refresh every minute
+</script>
+</body>
+</html>
